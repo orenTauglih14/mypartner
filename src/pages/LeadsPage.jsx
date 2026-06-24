@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import AppHeader from '../components/AppHeader';
-import BottomNav from '../components/BottomNav';
+import Layout from '../components/Layout';
 import FilterChip from '../components/FilterChip';
 import LeadCard from '../components/LeadCard';
 import './LeadsPage.css';
@@ -56,9 +55,7 @@ export default function LeadsPage() {
   });
 
   return (
-    <div className="app-shell">
-      <AppHeader title="לידים" />
-      <main className="page-content leads-page">
+    <Layout title="לידים" mainClass="leads-page">
 
         {/* Search */}
         <div className="px-container leads-search">
@@ -118,8 +115,6 @@ export default function LeadsPage() {
           )}
         </div>
 
-      </main>
-
       {/* FAB */}
       <button type="button" className="leads-fab">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -127,8 +122,6 @@ export default function LeadsPage() {
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </button>
-
-      <BottomNav />
-    </div>
+    </Layout>
   );
 }

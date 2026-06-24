@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import AppHeader from '../components/AppHeader';
-import BottomNav from '../components/BottomNav';
+import Layout from '../components/Layout';
 import FilterChip from '../components/FilterChip';
 import './PaymentsPage.css';
 
@@ -40,9 +39,7 @@ export default function PaymentsPage() {
   const totalOverdue = PAYMENTS.filter(p => p.status === 'overdue').reduce((s, p) => s + parseInt(p.amount.replace(/[^0-9]/g, '')), 0);
 
   return (
-    <div className="app-shell">
-      <AppHeader title="תשלומים" />
-      <main className="page-content payments-page">
+    <Layout title="תשלומים" mainClass="payments-page">
 
         {/* Navy hero */}
         <div className="px-container payments-hero">
@@ -139,8 +136,6 @@ export default function PaymentsPage() {
           })}
         </div>
 
-      </main>
-      <BottomNav />
-    </div>
+    </Layout>
   );
 }

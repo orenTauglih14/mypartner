@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import AppHeader from '../components/AppHeader';
-import BottomNav from '../components/BottomNav';
+import Layout from '../components/Layout';
 import './MorePage.css';
 
 const MENU_ITEMS = [
@@ -97,9 +96,7 @@ const MENU_ITEMS = [
 
 export default function MorePage() {
   return (
-    <div className="app-shell">
-      <AppHeader title="עוד" />
-      <main className="page-content more-page">
+    <Layout title="עוד" mainClass="more-page">
 
         {/* Profile card */}
         <div className="px-container more-profile">
@@ -147,8 +144,6 @@ export default function MorePage() {
           <span className="text-nano text-faint">MyPartner v1.0.0</span>
         </div>
 
-      </main>
-      <BottomNav />
-    </div>
+    </Layout>
   );
 }

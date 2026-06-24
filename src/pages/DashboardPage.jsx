@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import AppHeader from '../components/AppHeader';
-import BottomNav from '../components/BottomNav';
+import Layout from '../components/Layout';
 import StatCard from '../components/StatCard';
 import './DashboardPage.css';
 
@@ -64,9 +63,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="app-shell">
-      <AppHeader showLogo title="דשבורד" />
-      <main className="page-content dashboard-page">
+    <Layout title="דשבורד" showLogo mainClass="dashboard-page">
 
         {/* Greeting */}
         <section className="px-container dashboard-greeting">
@@ -184,8 +181,6 @@ export default function DashboardPage() {
           </div>
         </section>
 
-      </main>
-      <BottomNav />
-    </div>
+    </Layout>
   );
 }

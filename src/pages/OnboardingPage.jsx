@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import Footer from '../components/Footer';
 import './OnboardingPage.css';
 
 const PROFESSIONS = ['אינסטלטור', 'שיפוצניק', 'חשמלאי', 'טכנאי מיזוג', 'אחר'];
@@ -151,6 +152,7 @@ export default function OnboardingPage() {
           שמור והמשך אחר כך
         </button>
       </div>
+      <Footer />
     </div>
   );
 }

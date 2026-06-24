@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Logo from '../components/Logo';
+import Footer from '../components/Footer';
 import './WelcomePage.css';
 
 const BENEFITS = [
@@ -122,6 +123,7 @@ export default function WelcomePage() {
       <div className="welcome-footer">
         <span className="text-nano text-faint">ללא דרישת כרטיס אשראי · התחל בחינם</span>
       </div>
+      <Footer />
     </div>
   );
 }

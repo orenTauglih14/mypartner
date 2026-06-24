@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AppHeader from '../components/AppHeader';
+import Layout from '../components/Layout';
 import './CreateQuotePage.css';
 
 const TABS = [
@@ -73,9 +73,7 @@ export default function CreateQuotePage() {
   };
 
   return (
-    <div className="app-shell">
-      <AppHeader title="הצעת מחיר חדשה" showBack />
-      <main className="page-content create-quote-page">
+    <Layout title="הצעת מחיר חדשה" showBack showNav={false} mainClass="create-quote-page">
 
         {/* Tab bar */}
         <div className="cq-tabs px-container">
@@ -352,8 +350,7 @@ export default function CreateQuotePage() {
           )}
         </div>
 
-      </main>
-    </div>
+    </Layout>
   );
 }
 

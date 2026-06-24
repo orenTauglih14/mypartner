@@ -1,5 +1,4 @@
-import AppHeader from '../components/AppHeader';
-import BottomNav from '../components/BottomNav';
+import Layout from '../components/Layout';
 import './CollectionsPage.css';
 
 const TARGET = 50000;
@@ -62,9 +61,7 @@ function CashflowChart() {
 
 export default function CollectionsPage() {
   return (
-    <div className="app-shell">
-      <AppHeader title="גבייה" />
-      <main className="page-content collections-page">
+    <Layout title="גבייה" mainClass="collections-page">
 
         {/* Hero target */}
         <div className="px-container collections-hero">
@@ -173,8 +170,6 @@ export default function CollectionsPage() {
           </div>
         </div>
 
-      </main>
-      <BottomNav />
-    </div>
+    </Layout>
   );
 }

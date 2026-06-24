@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Logo from '../components/Logo';
+import Footer from '../components/Footer';
 import './LoginPage.css';
 
 function GoogleLogo() {
@@ -101,6 +102,7 @@ export default function LoginPage() {
           <Link to="/onboarding" className="login-signup__link">התחל עכשיו</Link>
         </p>
       </div>
+      <Footer />
     </div>
   );
 }

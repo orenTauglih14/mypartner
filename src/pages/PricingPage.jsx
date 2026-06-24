@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../components/Logo';
+import Footer from '../components/Footer';
 import './PricingPage.css';
 
 const PLANS = [
@@ -217,6 +218,7 @@ export default function PricingPage() {
         <span className="text-nano text-faint">·</span>
         <span className="text-nano text-faint">תמיכה בעברית</span>
       </footer>
+      <Footer />
     </div>
   );
 }
