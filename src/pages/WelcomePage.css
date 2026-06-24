@@ -1,0 +1,200 @@
+.welcome-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  width: 100%;
+  max-width: var(--app-max-width);
+  margin: 0 auto;
+  padding-bottom: 32px;
+}
+
+/* Header */
+.welcome-header {
+  padding: 20px var(--container) 16px;
+}
+
+/* Hero */
+.welcome-hero {
+  padding: 12px var(--container) 24px;
+}
+
+.welcome-hero__tag {
+  margin-bottom: 14px;
+}
+
+.welcome-hero__title {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--ink2);
+  letter-spacing: -0.8px;
+  margin-bottom: 14px;
+}
+
+.welcome-hero__subtitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink-mute);
+  line-height: 1.55;
+  max-width: 300px;
+}
+
+/* AI demo card */
+.welcome-demo {
+  margin-bottom: 20px;
+}
+
+.welcome-ai-card {
+  background: var(--ink);
+  border-radius: var(--radius-xl);
+  padding: 18px;
+  box-shadow: var(--shadow-hero);
+  color: var(--white);
+}
+
+.welcome-ai-card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.welcome-ai-card__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.welcome-ai-card__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+}
+
+.welcome-ai-card__sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  margin-top: 3px;
+}
+
+.welcome-ai-card__live {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.welcome-ai-card__dot {
+  width: 7px;
+  height: 7px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.welcome-ai-card__bubble {
+  background: rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.welcome-ai-card__footer {
+  display: flex;
+  gap: 24px;
+}
+
+.welcome-ai-card__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.welcome-ai-card__stat-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -0.6px;
+  font-family: var(--font-body);
+}
+
+.welcome-ai-card__stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+}
+
+/* Benefits */
+.welcome-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 24px;
+}
+
+.welcome-benefit {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.welcome-benefit:last-child {
+  border-bottom: none;
+}
+
+.welcome-benefit__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.welcome-benefit__text {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink2);
+  margin-bottom: 2px;
+}
+
+.welcome-benefit__sub {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-faint);
+}
+
+/* CTA */
+.welcome-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.welcome-footer {
+  text-align: center;
+  padding: 0 var(--container);
+}

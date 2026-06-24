@@ -1,0 +1,119 @@
+.more-page {
+  padding-top: calc(var(--header-height) + 12px);
+}
+
+/* Profile */
+.more-profile { margin-bottom: 20px; }
+
+.more-profile-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+.more-profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.more-profile-info { flex: 1; }
+
+.more-profile-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink2);
+}
+
+.more-profile-role {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  margin-top: 3px;
+}
+
+/* Sections */
+.more-section { margin-bottom: 20px; }
+
+.more-section__title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+  padding-right: 4px;
+}
+
+.more-section__list {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+/* Item */
+.more-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  transition: background 150ms ease;
+}
+
+.more-item:last-child { border-bottom: none; }
+.more-item:active { background: var(--tint); }
+
+.more-item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.more-item__body { flex: 1; min-width: 0; }
+
+.more-item__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink2);
+}
+
+.more-item--danger .more-item__label { color: var(--danger); }
+
+.more-item__sub {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+.more-item__arrow {
+  color: var(--ink-ghost);
+  flex-shrink: 0;
+}
+
+/* Version */
+.more-version {
+  text-align: center;
+  padding-bottom: 8px;
+}

@@ -1,0 +1,153 @@
+.collections-page { padding-top: calc(var(--header-height) + 12px); }
+.collections-section-title { font-size: 15px; font-weight: 800; color: var(--ink2); margin-bottom: 10px; }
+
+/* Hero */
+.collections-hero { margin-bottom: 18px; }
+
+.collections-hero-card {
+  background: var(--ink); border-radius: var(--radius-xl);
+  padding: 20px; box-shadow: var(--shadow-hero); color: white;
+}
+
+.collections-hero-card__top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.collections-hero-card__label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); margin-bottom: 5px; }
+.collections-hero-card__target { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+
+.collections-ring { flex-shrink: 0; }
+
+.collections-hero-card__bottom {
+  display: flex; justify-content: space-between; margin-top: 10px;
+  font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6);
+}
+
+/* Aging */
+.collections-aging { margin-bottom: 18px; }
+
+.aging-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+
+.aging-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 12px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  box-shadow: var(--shadow-card);
+}
+
+.aging-card__bar {
+  width: 8px; height: 56px; background: var(--bg);
+  border-radius: var(--radius-pill); overflow: hidden;
+  display: flex; align-items: flex-end;
+}
+
+.aging-card__fill {
+  width: 100%; border-radius: var(--radius-pill);
+  transition: height 600ms ease;
+}
+
+.aging-card__amount { font-size: 12px; font-weight: 800; }
+.aging-card__label { font-size: 9.5px; font-weight: 600; color: var(--ink-faint); text-align: center; }
+.aging-card__count { font-size: 10px; font-weight: 600; color: var(--ink-ghost); }
+
+/* Cashflow */
+.collections-cashflow { margin-bottom: 18px; }
+
+.collections-chart-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); padding: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.cashflow-chart {
+  display: flex; align-items: flex-end; gap: 8px; position: relative;
+}
+
+.cashflow-col {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+
+.cashflow-bars { display: flex; gap: 3px; align-items: flex-end; height: 80px; }
+
+.cashflow-bar {
+  width: 14px; border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  min-height: 4px; transition: height 400ms ease;
+}
+
+.cashflow-bar--forecast { background: var(--border2); }
+.cashflow-bar--actual { background: var(--primary); }
+
+.cashflow-label { font-size: 10.5px; font-weight: 700; color: var(--ink-faint); }
+
+.cashflow-legend {
+  position: absolute; top: 0; left: 0;
+  display: flex; gap: 10px;
+}
+
+.cashflow-legend__item {
+  font-size: 10px; font-weight: 700; color: var(--ink-faint);
+  display: flex; align-items: center; gap: 4px;
+}
+
+.cashflow-legend__item::before { content: ''; width: 8px; height: 8px; border-radius: 2px; }
+.cashflow-legend__item--actual::before { background: var(--primary); }
+.cashflow-legend__item--forecast::before { background: var(--border2); }
+
+/* Debtors */
+.collections-debtors { margin-bottom: 18px; }
+
+.debtors-list {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-card);
+}
+
+.debtor-row {
+  display: flex; align-items: center; gap: 10px; padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.debtor-row:last-child { border-bottom: none; }
+
+.debtor-rank { font-size: 12px; font-weight: 800; color: var(--ink-faint); width: 22px; flex-shrink: 0; }
+
+.debtor-avatar {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--danger-soft); color: var(--danger-ink);
+  font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.debtor-info { flex: 1; min-width: 0; }
+.debtor-name { font-size: 13.5px; font-weight: 700; color: var(--ink2); }
+.debtor-days { font-size: 11.5px; font-weight: 500; color: var(--danger); margin-top: 2px; }
+
+.debtor-amount { font-size: 15px; font-weight: 800; color: var(--ink2); letter-spacing: -0.4px; flex-shrink: 0; }
+
+.debtor-action {
+  background: var(--primary); color: white; border: none;
+  border-radius: var(--radius-sm); padding: 5px 12px;
+  font-family: var(--font-body); font-size: 12px; font-weight: 700;
+  cursor: pointer; flex-shrink: 0;
+}
+
+/* Activity */
+.collections-activity { padding-bottom: 20px; }
+
+.activity-feed {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-card);
+}
+
+.activity-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.activity-item:last-child { border-bottom: none; }
+
+.activity-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.activity-icon--reminder { background: var(--warn-soft); color: var(--warn-ink); }
+.activity-icon--view { background: var(--primary-soft); color: var(--primary); }
+.activity-icon--payment { background: var(--success-soft); color: var(--success-ink); }
+
+.activity-text { flex: 1; font-size: 13px; font-weight: 600; color: var(--ink2); }
+.activity-time { font-size: 11px; font-weight: 600; color: var(--ink-faint); white-space: nowrap; }

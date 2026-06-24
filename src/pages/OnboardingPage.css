@@ -1,0 +1,194 @@
+.onboarding-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  width: 100%;
+  max-width: var(--app-max-width);
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+/* Header */
+.onboarding-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px var(--container) 16px;
+}
+
+.onboarding-header__skip {
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* Progress */
+.onboarding-progress {
+  margin-bottom: 20px;
+}
+
+.onboarding-progress__label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+
+/* Title */
+.onboarding-title {
+  margin-bottom: 20px;
+}
+
+.onboarding-title h1 {
+  margin-bottom: 6px;
+}
+
+/* Chat */
+.onboarding-chat {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.onboarding-bot-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.onboarding-bot-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.onboarding-bot-bubble {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px 16px 16px 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink2);
+  line-height: 1.55;
+  box-shadow: var(--shadow-card);
+  max-width: 85%;
+}
+
+.onboarding-user-msg {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.onboarding-user-bubble {
+  background: var(--primary-soft);
+  border-radius: 16px 4px 16px 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary-deep);
+  line-height: 1.55;
+  max-width: 85%;
+}
+
+/* Professions */
+.onboarding-professions { margin-bottom: 16px; }
+
+.onboarding-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Input */
+.onboarding-input { margin-bottom: 14px; }
+
+/* Upload card */
+.onboarding-upload { margin-bottom: 12px; }
+
+.onboarding-upload-card {
+  background: var(--white);
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.onboarding-upload-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.onboarding-upload-card__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink2);
+  margin-bottom: 3px;
+}
+
+.onboarding-upload-card__sub {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  line-height: 1.4;
+}
+
+.onboarding-upload-card > .btn {
+  margin-right: auto;
+  flex-shrink: 0;
+}
+
+/* Tip */
+.onboarding-tip { margin-bottom: 20px; }
+
+.onboarding-tip-card {
+  background: var(--tint2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 13px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--primary-deep);
+}
+
+.onboarding-tip-card__title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.onboarding-tip-card__body {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink3);
+  line-height: 1.5;
+}
+
+/* CTA */
+.onboarding-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
