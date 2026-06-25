@@ -1,146 +1,130 @@
-import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import emailjs from '@emailjs/browser';
 import { supabase, isConfigured } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
-const STORAGE_USER = 'mp_user';
-const STORAGE_AUTH = 'mp_auth';
+const STORAGE_USER  = 'mp_user';
+const STORAGE_AUTH  = 'mp_auth';
+const STORAGE_OTP   = 'mp_otp_pending';
+
+const EJS_SERVICE  = import.meta.env.VITE_EMAILJS_SERVICE_ID  || '';
+const EJS_TEMPLATE = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '';
+const EJS_KEY      = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  || '';
+const ejsReady     = !!(EJS_SERVICE && EJS_TEMPLATE && EJS_KEY);
+
+const genCode = () => String(Math.floor(100000 + Math.random() * 900000));
 
 export function AuthProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn]   = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [authReady, setAuthReady] = useState(!isConfigured);
-
-  // Prevent onAuthStateChange from auto-logging in while user is mid-OTP flow.
-  // Supabase creates a session immediately when email confirmation is disabled.
-  const inOtpFlow = useRef(false);
+  const [authReady, setAuthReady]     = useState(true); // EmailJS is sync-ready
 
   useEffect(() => {
-    if (!isConfigured) {
-      const loggedIn = !!localStorage.getItem(STORAGE_AUTH);
-      const user = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; } })();
-      setIsLoggedIn(loggedIn);
-      setCurrentUser(user);
-      return;
+    // Restore session from localStorage
+    const loggedIn = !!localStorage.getItem(STORAGE_AUTH);
+    const user = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; } })();
+    setIsLoggedIn(loggedIn);
+    setCurrentUser(user);
+
+    // Also watch Supabase session (for magic-link fallback or future use)
+    if (isConfigured) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+        if (session && !localStorage.getItem(STORAGE_AUTH)) {
+          // User arrived via Supabase magic link — accept the session
+          const u = { email: session.user.email, name: session.user.email.split('@')[0] };
+          localStorage.setItem(STORAGE_AUTH, 'true');
+          localStorage.setItem(STORAGE_USER, JSON.stringify(u));
+          setCurrentUser(u);
+          setIsLoggedIn(true);
+        }
+      });
+      return () => subscription.unsubscribe();
     }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-      setCurrentUser(session?.user ?? null);
-      setAuthReady(true);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (inOtpFlow.current) return; // ignore auto-session during OTP entry
-      setIsLoggedIn(!!session);
-      setCurrentUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email, password) => {
-    if (!isConfigured) {
-      const user = { email: email.trim(), name: email.split('@')[0] };
-      localStorage.setItem(STORAGE_AUTH, 'true');
-      localStorage.setItem(STORAGE_USER, JSON.stringify(user));
-      setCurrentUser(user);
-      setIsLoggedIn(true);
-      return { ok: true };
-    }
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (error) return { ok: false, error: 'אימייל או סיסמה שגויים' };
-    return { ok: true };
-  };
-
+  // ── Send OTP ──────────────────────────────────────────────────────────────
   const sendOtp = async (email) => {
-    if (!isConfigured) {
-      const user = { email: email.trim(), name: email.split('@')[0] };
+    const trimmed = email.trim().toLowerCase();
+
+    // Demo mode (no EmailJS configured)
+    if (!ejsReady) {
+      const user = { email: trimmed, name: trimmed.split('@')[0] };
       localStorage.setItem(STORAGE_AUTH, 'true');
       localStorage.setItem(STORAGE_USER, JSON.stringify(user));
       setCurrentUser(user);
       setIsLoggedIn(true);
       return { ok: true, demo: true };
     }
-    inOtpFlow.current = true;
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { shouldCreateUser: true },
-    });
-    if (error) {
-      inOtpFlow.current = false;
+
+    const code    = genCode();
+    const expires = Date.now() + 10 * 60 * 1000; // 10 min
+    localStorage.setItem(STORAGE_OTP, JSON.stringify({ email: trimmed, code, expires }));
+
+    try {
+      await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+        to_email: trimmed,
+        otp_code: code,
+        to_name:  trimmed.split('@')[0],
+      }, EJS_KEY);
+      return { ok: true };
+    } catch {
+      localStorage.removeItem(STORAGE_OTP);
       return { ok: false, error: 'שגיאה בשליחת קוד — נסה שוב' };
     }
-    return { ok: true };
   };
 
+  // ── Verify OTP ────────────────────────────────────────────────────────────
   const verifyOtp = async (email, token) => {
-    if (!isConfigured) return { ok: true };
-    inOtpFlow.current = false; // allow onAuthStateChange to fire once verified
-    const { error } = await supabase.auth.verifyOtp({
-      email: email.trim(),
-      token: token.trim(),
-      type: 'email',
-    });
-    if (error) {
-      inOtpFlow.current = true; // still in OTP flow, user must retry
-      return { ok: false, error: 'קוד שגוי או פג תוקף — נסה שוב' };
+    if (!ejsReady) return { ok: true };
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedToken = token.trim();
+
+    const stored = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_OTP)); } catch { return null; } })();
+    if (!stored)                          return { ok: false, error: 'לא נמצא קוד — שלח מחדש' };
+    if (stored.email !== trimmedEmail)    return { ok: false, error: 'אימייל לא תואם' };
+    if (stored.expires < Date.now())      return { ok: false, error: 'הקוד פג תוקף — שלח מחדש' };
+    if (stored.code !== trimmedToken)     return { ok: false, error: 'קוד שגוי — נסה שוב' };
+
+    localStorage.removeItem(STORAGE_OTP);
+
+    const user = { email: trimmedEmail, name: trimmedEmail.split('@')[0] };
+    localStorage.setItem(STORAGE_AUTH, 'true');
+    localStorage.setItem(STORAGE_USER, JSON.stringify(user));
+    setCurrentUser(user);
+    setIsLoggedIn(true);
+
+    // Fire Supabase sign-in in background so RLS works (best-effort)
+    if (isConfigured) {
+      const pw = btoa(trimmedEmail + '_mp');
+      supabase.auth.signUp({ email: trimmedEmail, password: pw }).then(() =>
+        supabase.auth.signInWithPassword({ email: trimmedEmail, password: pw })
+      );
     }
+
     return { ok: true };
   };
 
+  // ── Register (keep for RegisterPage compatibility) ─────────────────────────
   const register = async (userData) => {
-    if (!isConfigured) {
-      const saved = { ...userData, email: userData.email.trim().toLowerCase() };
-      localStorage.setItem(STORAGE_USER, JSON.stringify(saved));
-      localStorage.setItem(STORAGE_AUTH, 'true');
-      setCurrentUser(saved);
-      setIsLoggedIn(true);
-      return { ok: true, confirmed: true };
-    }
-    const { data, error } = await supabase.auth.signUp({
-      email: userData.email.trim(),
-      password: userData.password,
-      options: { data: { full_name: userData.name, profession: userData.profession, phone: userData.phone } },
-    });
-    if (error) return { ok: false, error: error.message };
-    if (data.session) return { ok: true, confirmed: true };
-    return { ok: true, confirmed: false };
+    return sendOtp(userData.email); // reuse OTP flow
   };
 
+  // ── Logout ────────────────────────────────────────────────────────────────
   const logout = async () => {
-    inOtpFlow.current = false;
-    if (!isConfigured) {
-      localStorage.removeItem(STORAGE_AUTH);
-      setIsLoggedIn(false);
-      setCurrentUser(null);
-      return;
-    }
-    await supabase.auth.signOut();
+    localStorage.removeItem(STORAGE_AUTH);
+    localStorage.removeItem(STORAGE_USER);
+    localStorage.removeItem(STORAGE_OTP);
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    if (isConfigured) supabase.auth.signOut();
   };
 
-  const resetPassword = async (email) => {
-    if (!isConfigured) {
-      const stored = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; } })();
-      if (stored && email.trim().toLowerCase() === stored.email?.toLowerCase()) {
-        return { ok: true, password: stored.password || '(כנס עם כל סיסמה)' };
-      }
-      return { ok: false, error: 'האימייל לא נמצא במערכת' };
-    }
+  const resetPassword = async () => ({ ok: true });
+  const login = async (email) => sendOtp(email);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
-    if (error) return { ok: false, error: 'שגיאה בשליחת איפוס סיסמה' };
-    return { ok: true, emailSent: true };
-  };
-
-  if (!authReady) {
-    return (
-      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg, #F4F6FB)' }}>
-        <div style={{ width: 36, height: 36, border: '3px solid #0050CB', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
+  if (!authReady) return null;
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, currentUser, login, sendOtp, verifyOtp, register, logout, resetPassword }}>

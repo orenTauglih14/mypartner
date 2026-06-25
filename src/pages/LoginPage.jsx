@@ -125,24 +125,35 @@ export default function LoginPage() {
         {step === 2 && (
           <>
             <div className="login-heading">
-              <div style={{ fontSize: 44, marginBottom: 8 }}>✉️</div>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>✉️</div>
               <h2 className="text-h2">בדוק את האימייל</h2>
-              <p className="text-small text-mute">שלחנו קישור כניסה אל <strong>{email}</strong></p>
+              <p className="text-small text-mute">שלחנו קוד 6 ספרות ל-<strong>{email}</strong></p>
             </div>
-            <div className="login-form">
-              <div style={{ background: '#F0F6FF', border: '1.5px solid #C7D8F8', borderRadius: 14, padding: '20px 18px', textAlign: 'center' }}>
-                <div style={{ fontSize: 28, marginBottom: 10 }}>🔗</div>
-                <div style={{ fontWeight: 700, fontSize: 15, color: '#1E3A6E', marginBottom: 6 }}>לחץ על "Sign in" במייל</div>
-                <div style={{ fontSize: 13, color: '#5A6A8A', lineHeight: 1.6 }}>
-                  פתח את האימייל שקיבלת מ-<strong>Supabase Auth</strong><br />
-                  ולחץ על הקישור — תיכנס ישירות לאפליקציה
+            <form className="login-form" onSubmit={handleVerify}>
+              {error && <div className="login-error">{error}</div>}
+              <div className="login-field">
+                <label className="login-label">קוד אימות</label>
+                <div className="input-wrap">
+                  <input
+                    type="text"
+                    className="input-field"
+                    placeholder="123456"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => { setCode(e.target.value.replace(/\D/g, '')); setError(''); }}
+                    style={{ letterSpacing: 8, fontSize: 22, textAlign: 'center' }}
+                    autoFocus
+                  />
                 </div>
               </div>
-              {error && <div className="login-error">{error}</div>}
-              <button type="button" className="btn btn--outline btn--lg btn--full" style={{ marginTop: 8 }} onClick={() => { setStep(1); setCode(''); setError(''); }}>
-                שלח קישור מחדש
+              <button type="submit" className="btn btn--primary btn--lg btn--full" disabled={loading || code.length < 4}>
+                {loading ? 'מאמת...' : 'כנס לחשבון'}
               </button>
-            </div>
+              <button type="button" className="btn btn--outline btn--lg btn--full" onClick={() => { setStep(1); setCode(''); setError(''); }}>
+                שלח קוד מחדש
+              </button>
+            </form>
           </>
         )}
 
