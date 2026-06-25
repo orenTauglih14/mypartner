@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase, isConfigured } from '../lib/supabase';
 
 const AuthContext = createContext(null);
@@ -10,6 +10,10 @@ export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [authReady, setAuthReady] = useState(!isConfigured);
+
+  // Prevent onAuthStateChange from auto-logging in while user is mid-OTP flow.
+  // Supabase creates a session immediately when email confirmation is disabled.
+  const inOtpFlow = useRef(false);
 
   useEffect(() => {
     if (!isConfigured) {
@@ -27,6 +31,7 @@ export function AuthProvider({ children }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (inOtpFlow.current) return; // ignore auto-session during OTP entry
       setIsLoggedIn(!!session);
       setCurrentUser(session?.user ?? null);
     });
@@ -57,22 +62,30 @@ export function AuthProvider({ children }) {
       setIsLoggedIn(true);
       return { ok: true, demo: true };
     }
+    inOtpFlow.current = true; // block onAuthStateChange until code is verified
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { shouldCreateUser: true },
     });
-    if (error) return { ok: false, error: 'שגיאה בשליחת קוד — בדוק את האימייל' };
+    if (error) {
+      inOtpFlow.current = false;
+      return { ok: false, error: 'שגיאה בשליחת קוד — בדוק את האימייל' };
+    }
     return { ok: true };
   };
 
   const verifyOtp = async (email, token) => {
     if (!isConfigured) return { ok: true };
+    inOtpFlow.current = false; // allow onAuthStateChange to fire once verified
     const { error } = await supabase.auth.verifyOtp({
       email: email.trim(),
       token: token.trim(),
       type: 'email',
     });
-    if (error) return { ok: false, error: 'קוד שגוי או פג תוקף — נסה שוב' };
+    if (error) {
+      inOtpFlow.current = true; // still in OTP flow, user must retry
+      return { ok: false, error: 'קוד שגוי או פג תוקף — נסה שוב' };
+    }
     return { ok: true };
   };
 
@@ -96,6 +109,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    inOtpFlow.current = false;
     if (!isConfigured) {
       localStorage.removeItem(STORAGE_AUTH);
       setIsLoggedIn(false);
