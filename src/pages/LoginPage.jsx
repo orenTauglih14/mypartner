@@ -19,39 +19,24 @@ const STATS = [
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { sendOtp, verifyOtp } = useAuth();
+  const { login } = useAuth();
 
-  const [step, setStep] = useState(1); // 1=email, 2=code
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
-  const handleSendOtp = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email.trim()) { setError('יש להזין אימייל'); return; }
+    if (!email.trim() || !password.trim()) { setError('יש למלא אימייל וסיסמה'); return; }
     setError('');
     setLoading(true);
-    const result = await sendOtp(email);
-    setLoading(false);
-    if (!result.ok) { setError(result.error); return; }
-    if (result.demo) { navigate('/dashboard'); return; }
-    setStep(2);
-  };
-
-  const handleVerify = async (e) => {
-    e.preventDefault();
-    if (code.trim().length < 4) { setError('יש להזין את הקוד מהאימייל'); return; }
-    setError('');
-    setLoading(true);
-    const result = await verifyOtp(email, code);
+    const result = await login(email, password);
     setLoading(false);
     if (!result.ok) { setError(result.error); return; }
     navigate('/dashboard');
   };
-
-  // Auto-detect magic link session on mount (when user returns from email link)
-  // This is handled automatically by Supabase onAuthStateChange in AuthContext
 
   return (
     <div className="login-page">
@@ -87,76 +72,67 @@ export default function LoginPage() {
 
       {/* ── Auth Card ── */}
       <div className="login-card">
+        <div className="login-heading">
+          <h2 className="text-h2">כניסה / הרשמה</h2>
+          <p className="text-small text-mute">אימייל חדש? ניצור לך חשבון אוטומטית</p>
+        </div>
 
-        {step === 1 && (
-          <>
-            <div className="login-heading">
-              <h2 className="text-h2">כניסה / הרשמה</h2>
-              <p className="text-small text-mute">הזן את האימייל ונשלח לך קוד כניסה</p>
+        <form className="login-form" onSubmit={handleSubmit}>
+          {error && <div className="login-error">{error}</div>}
+
+          <div className="login-field">
+            <label className="login-label">אימייל</label>
+            <div className="input-wrap">
+              <input
+                type="email"
+                className="input-field"
+                placeholder="you@example.com"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(''); }}
+              />
+              <span className="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </span>
             </div>
-            <form className="login-form" onSubmit={handleSendOtp}>
-              {error && <div className="login-error">{error}</div>}
-              <div className="login-field">
-                <label className="login-label">אימייל</label>
-                <div className="input-wrap">
-                  <input
-                    type="email"
-                    className="input-field"
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setError(''); }}
-                  />
-                  <span className="input-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                      <polyline points="22,6 12,13 2,6"/>
-                    </svg>
-                  </span>
-                </div>
-              </div>
-              <button type="submit" className="btn btn--primary btn--lg btn--full" disabled={loading || !email.trim()}>
-                {loading ? 'שולח...' : 'שלח קוד כניסה →'}
-              </button>
-            </form>
-          </>
-        )}
+          </div>
 
-        {step === 2 && (
-          <>
-            <div className="login-heading">
-              <div style={{ fontSize: 36, marginBottom: 8 }}>✉️</div>
-              <h2 className="text-h2">בדוק את האימייל</h2>
-              <p className="text-small text-mute">שלחנו קוד 6 ספרות ל-<strong>{email}</strong></p>
+          <div className="login-field">
+            <label className="login-label">סיסמה</label>
+            <div className="input-wrap">
+              <input
+                type={showPass ? 'text' : 'password'}
+                className="input-field"
+                placeholder="לפחות 6 תווים"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(''); }}
+              />
+              <span className="input-icon" style={{ cursor: 'pointer' }} onClick={() => setShowPass(!showPass)}>
+                {showPass ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                )}
+              </span>
             </div>
-            <form className="login-form" onSubmit={handleVerify}>
-              {error && <div className="login-error">{error}</div>}
-              <div className="login-field">
-                <label className="login-label">קוד אימות</label>
-                <div className="input-wrap">
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder="123456"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={code}
-                    onChange={(e) => { setCode(e.target.value.replace(/\D/g, '')); setError(''); }}
-                    style={{ letterSpacing: 8, fontSize: 22, textAlign: 'center' }}
-                    autoFocus
-                  />
-                </div>
-              </div>
-              <button type="submit" className="btn btn--primary btn--lg btn--full" disabled={loading || code.length < 4}>
-                {loading ? 'מאמת...' : 'כנס לחשבון'}
-              </button>
-              <button type="button" className="btn btn--outline btn--lg btn--full" onClick={() => { setStep(1); setCode(''); setError(''); }}>
-                שלח קוד מחדש
-              </button>
-            </form>
-          </>
-        )}
+          </div>
 
+          <button
+            type="submit"
+            className="btn btn--primary btn--lg btn--full"
+            disabled={loading || !email.trim() || !password.trim()}
+          >
+            {loading ? 'מתחבר...' : 'כניסה לחשבון →'}
+          </button>
+        </form>
+
+        <p className="text-small text-mute" style={{ textAlign: 'center', marginTop: 16 }}>
+          אימייל חדש = חשבון חדש נוצר אוטומטית
+        </p>
       </div>
 
       <Footer />
