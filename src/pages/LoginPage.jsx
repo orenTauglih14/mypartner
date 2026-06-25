@@ -122,35 +122,20 @@ export default function LoginPage() {
         {step === 2 && (
           <>
             <div className="login-heading">
-              <div style={{ fontSize: 36, marginBottom: 8 }}>✉️</div>
+              <div style={{ fontSize: 44, marginBottom: 8 }}>✉️</div>
               <h2 className="text-h2">בדוק את האימייל</h2>
-              <p className="text-small text-mute">שלחנו קוד 6 ספרות ל-<strong>{email}</strong></p>
+              <p className="text-small text-mute">שלחנו קישור כניסה ל-<strong>{email}</strong></p>
             </div>
-            <form className="login-form" onSubmit={handleVerify}>
-              {error && <div className="login-error">{error}</div>}
-              <div className="login-field">
-                <label className="login-label">קוד אימות</label>
-                <div className="input-wrap">
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder="123456"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={code}
-                    onChange={(e) => { setCode(e.target.value.replace(/\D/g, '')); setError(''); }}
-                    style={{ letterSpacing: 8, fontSize: 22, textAlign: 'center' }}
-                    autoFocus
-                  />
-                </div>
+            <div className="login-form">
+              <div style={{ background: '#F0F4FF', borderRadius: 14, padding: '20px 16px', textAlign: 'center', color: '#3B4B8C', fontSize: 14, lineHeight: 1.7 }}>
+                לחץ על הקישור <strong>"Sign in"</strong> שקיבלת במייל<br />
+                <span style={{ fontSize: 12, color: '#8891B2' }}>הקישור תקף לכמה דקות בלבד</span>
               </div>
-              <button type="submit" className="btn btn--primary btn--lg btn--full" disabled={loading || code.length < 4}>
-                {loading ? 'מאמת...' : 'כנס לחשבון'}
+              {error && <div className="login-error">{error}</div>}
+              <button type="button" className="btn btn--outline btn--lg btn--full" onClick={() => { setStep(1); setError(''); }}>
+                שלח קישור מחדש
               </button>
-              <button type="button" className="btn btn--outline btn--lg btn--full" onClick={() => { setStep(1); setCode(''); setError(''); }}>
-                שלח קוד מחדש
-              </button>
-            </form>
+            </div>
           </>
         )}
 
