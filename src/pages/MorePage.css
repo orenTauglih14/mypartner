@@ -68,11 +68,15 @@
 
 /* Item */
 .more-item {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 13px 16px;
-  border-bottom: 1px solid var(--border);
   text-decoration: none;
   transition: background 150ms ease;
 }

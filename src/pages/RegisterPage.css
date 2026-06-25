@@ -1,0 +1,130 @@
+.register-page {
+  min-height: 100dvh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0 40px;
+}
+
+.register-box {
+  width: 100%;
+  max-width: 430px;
+  padding: 32px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.register-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.register-heading {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.register-heading h1 { margin-bottom: 4px; }
+
+/* Social OAuth */
+.register-oauth {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.register-oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 46px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border2);
+  background: var(--white);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink2);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: all 150ms ease;
+}
+.register-oauth-btn:active { transform: scale(0.97); background: var(--bg); }
+
+/* Divider */
+.register-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.register-divider__line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.register-divider__text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* Form */
+.register-form { display: flex; flex-direction: column; gap: 12px; }
+
+.register-field { display: flex; flex-direction: column; gap: 5px; }
+
+.register-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink3);
+}
+
+.input-wrap--select .input-field {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.input-icon--btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Terms */
+.register-terms {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  text-align: center;
+  line-height: 1.5;
+}
+.register-terms__link {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Login link */
+.register-login {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--ink-mute);
+}
+.register-login__link {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+.register-login__link:hover { text-decoration: underline; }

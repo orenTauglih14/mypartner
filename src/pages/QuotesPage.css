@@ -101,7 +101,22 @@
 .quote-action:active { transform: scale(0.95); }
 
 .quote-action--view { background: var(--tint2); border-color: var(--tint2); color: var(--primary-deep); }
+.quote-action--view.quote-action--active { background: var(--primary-soft); color: var(--primary); }
 .quote-action--send { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 4px 12px rgba(0,80,203,0.22); }
+.quote-action--follow { background: var(--warn-soft); border-color: var(--warn-soft); color: var(--warn-ink); }
+
+/* Expanded detail panel */
+.quote-card__detail {
+  padding: 12px 0 8px;
+  border-top: 1px solid var(--border);
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.quote-detail-row { display: flex; justify-content: space-between; align-items: center; }
+.quote-detail-label { font-size: 12px; color: var(--ink-mute); font-weight: 600; }
+.quote-detail-val { font-size: 13px; color: var(--ink-2); font-weight: 600; }
 
 /* FAB */
 .quotes-fab {

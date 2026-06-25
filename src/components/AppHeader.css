@@ -94,6 +94,48 @@
   line-height: 1;
 }
 
+/* ── ראובן center button ── */
+.bottom-nav__item--ai {
+  position: relative;
+  top: -10px;
+  color: #1B3A6B;
+}
+
+.bottom-nav__item--ai .bottom-nav__label {
+  font-family: var(--font-body, 'Rubik', sans-serif);
+  font-weight: 700;
+  font-size: 10px;
+  color: #1B3A6B;
+  margin-top: 2px;
+}
+
+.bottom-nav__item--ai.bottom-nav__item--active .bottom-nav__label {
+  color: #0050CB;
+}
+
+.bottom-nav__ai-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,50,150,0.35);
+  border: 2.5px solid rgba(255,255,255,0.9);
+  transition: transform 150ms, box-shadow 150ms;
+}
+
+.bottom-nav__item--ai:active .bottom-nav__ai-btn {
+  transform: scale(0.9);
+  box-shadow: 0 2px 8px rgba(0,50,150,0.2);
+}
+
+.bottom-nav__item--ai.bottom-nav__item--active .bottom-nav__ai-btn {
+  border-color: #0050CB;
+  box-shadow: 0 4px 18px rgba(0,80,203,0.45);
+}
+
 /* StatCard */
 .stat-card {
   background: var(--white);

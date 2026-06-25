@@ -1,8 +1,90 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { useAuth } from '../context/AuthContext';
 import './MorePage.css';
 
 const MENU_ITEMS = [
+  {
+    section: 'מכירות',
+    items: [
+      {
+        to: '/quotes',
+        label: 'הצעות מחיר',
+        sub: 'יצירה וניהול הצעות',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        ),
+        color: '#EEF3FF',
+        iconColor: '#0050CB',
+      },
+      {
+        to: '/invoices',
+        label: 'חשבוניות',
+        sub: 'חשבונית מס, מס/קבלה וקבלה',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <line x1="9" y1="7" x2="15" y2="7"/>
+            <line x1="9" y1="11" x2="15" y2="11"/>
+            <line x1="9" y1="15" x2="12" y2="15"/>
+          </svg>
+        ),
+        color: '#F0F4FF',
+        iconColor: '#0050CB',
+      },
+    ],
+  },
+  {
+    section: 'ספקים ומלאי',
+    items: [
+      {
+        to: '/suppliers',
+        label: 'ספקים',
+        sub: 'רשימת ספקים ומחירונים',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        ),
+        color: '#F0FFF4',
+        iconColor: '#0AB571',
+      },
+      {
+        to: '/inventory',
+        label: 'ניהול מלאי',
+        sub: 'מעקב כמויות ואזהרות',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        ),
+        color: '#FFF8F0',
+        iconColor: '#E67E22',
+      },
+      {
+        to: '/purchase-orders',
+        label: 'הזמנות רכש',
+        sub: 'הזמנה ומעקב משלוחים',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+        ),
+        color: '#F5F0FF',
+        iconColor: '#7C3AED',
+      },
+    ],
+  },
   {
     section: 'ניהול',
     items: [
@@ -58,6 +140,18 @@ const MENU_ITEMS = [
         color: 'var(--tint2)',
         iconColor: 'var(--primary)',
       },
+      {
+        to: '/messages',
+        label: 'תבניות הודעות',
+        sub: 'תזכורות ב-WhatsApp — רשמי וידידותי',
+        icon: (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        ),
+        color: '#E8FFF3',
+        iconColor: '#0AB571',
+      },
     ],
   },
   {
@@ -95,16 +189,32 @@ const MENU_ITEMS = [
 ];
 
 export default function MorePage() {
+  const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
+
+  const displayName = currentUser?.name || 'ישראל ישראלי';
+  const displayRole  = currentUser?.profession || 'בעל מקצוע';
+  const initials     = displayName.slice(0, 1);
+
+  const handleItemClick = (item) => {
+    if (item.danger) {
+      logout();
+      navigate('/');
+      return;
+    }
+    navigate(item.to);
+  };
+
   return (
     <Layout title="עוד" mainClass="more-page">
 
         {/* Profile card */}
         <div className="px-container more-profile">
           <div className="more-profile-card">
-            <div className="more-profile-avatar">י</div>
+            <div className="more-profile-avatar">{initials}</div>
             <div className="more-profile-info">
-              <div className="more-profile-name">ישראל ישראלי</div>
-              <div className="more-profile-role">אינסטלטור מוסמך</div>
+              <div className="more-profile-name">{displayName}</div>
+              <div className="more-profile-role">{displayRole}</div>
             </div>
             <span className="chip chip--primary">Pro</span>
           </div>
@@ -116,10 +226,11 @@ export default function MorePage() {
             <div className="more-section__title">{section.section}</div>
             <div className="more-section__list">
               {section.items.map((item) => (
-                <Link
+                <button
                   key={item.to + item.label}
-                  to={item.to}
+                  type="button"
                   className={`more-item${item.danger ? ' more-item--danger' : ''}`}
+                  onClick={() => handleItemClick(item)}
                 >
                   <div
                     className="more-item__icon"
@@ -134,7 +245,7 @@ export default function MorePage() {
                   <svg className="more-item__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <path d="M9 18l6-6-6-6"/>
                   </svg>
-                </Link>
+                </button>
               ))}
             </div>
           </div>

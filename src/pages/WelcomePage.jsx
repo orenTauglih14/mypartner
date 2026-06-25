@@ -115,7 +115,7 @@ export default function WelcomePage() {
         <Link to="/onboarding" className="btn btn--primary btn--lg btn--full">
           התחל עכשיו
         </Link>
-        <Link to="/dashboard" className="btn btn--outline btn--lg btn--full">
+        <Link to="/login" className="btn btn--outline btn--lg btn--full">
           כניסה לחשבון
         </Link>
       </section>

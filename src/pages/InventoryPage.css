@@ -1,0 +1,126 @@
+.inventory-page { padding-bottom: 90px; }
+
+/* Hero */
+.inv-hero {
+  display: flex;
+  align-items: center;
+  margin: 0 var(--container) 16px;
+  background: linear-gradient(135deg, #1A2342 0%, #2E3A5C 100%);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  color: #fff;
+}
+.inv-hero__stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.inv-hero__val { font-size: 22px; font-weight: 900; }
+.inv-hero__val--warn { color: #FFB020; }
+.inv-hero__lbl { font-size: 10.5px; opacity: 0.65; }
+.inv-hero__divider { width: 1px; height: 38px; background: rgba(255,255,255,0.2); margin: 0 4px; }
+
+/* Alert */
+.inv-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  background: #FFF8E6;
+  border: 1px solid #FFE066;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #92620A;
+}
+
+/* Filters */
+.inv-filters { display: flex; gap: 8px; padding-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
+.inv-filters::-webkit-scrollbar { display: none; }
+
+/* List */
+.inv-list { display: flex; flex-direction: column; gap: 10px; }
+
+/* Card */
+.inv-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+}
+.inv-card--empty { opacity: 0.7; border-color: #FFCDD2; }
+
+.inv-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+.inv-card__name { font-size: 14px; font-weight: 700; color: var(--ink1); margin-bottom: 2px; }
+.inv-card__sku { font-size: 11px; color: var(--ink-faint); font-family: 'JetBrains Mono', monospace; }
+
+/* Status chip */
+.inv-chip {
+  height: 20px; padding: 0 8px; border-radius: 10px;
+  font-size: 10.5px; font-weight: 700; flex-shrink: 0;
+  display: flex; align-items: center;
+}
+.inv-chip--ok     { background: #E8FFF4; color: #0AB571; }
+.inv-chip--warn   { background: #FFF8E6; color: #B06C00; }
+.inv-chip--danger { background: #FFEBEE; color: #C62828; }
+
+/* Body stats */
+.inv-card__body {
+  display: flex;
+  gap: 0;
+  background: var(--bg2);
+  border-radius: 8px;
+  padding: 10px 0;
+  margin-bottom: 10px;
+}
+.inv-stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.inv-stat + .inv-stat { border-right: 1px solid var(--border); }
+.inv-stat__val { font-size: 16px; font-weight: 800; color: var(--ink1); }
+.inv-stat__val--zero { color: #C62828; }
+.inv-stat__val--low  { color: #B06C00; }
+.inv-stat__lbl { font-size: 10px; color: var(--ink-faint); font-weight: 600; }
+
+/* Stock bar */
+.inv-bar-wrap {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.inv-bar { height: 100%; border-radius: 2px; transition: width 400ms ease; }
+.inv-bar--ok   { background: #0AB571; }
+.inv-bar--low  { background: #FFB020; }
+.inv-bar--zero { background: #E53935; width: 0 !important; }
+
+/* Qty controls */
+.inv-card__actions { display: flex; align-items: center; gap: 10px; }
+.inv-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  border: 1.5px solid var(--border2); background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--ink1); transition: all 150ms;
+}
+.inv-btn:disabled { opacity: 0.35; cursor: default; }
+.inv-btn--plus { background: var(--primary); border-color: var(--primary); color: #fff; }
+.inv-btn--plus:not(:disabled):active { transform: scale(0.9); }
+.inv-btn--minus:not(:disabled):active { transform: scale(0.9); }
+
+.inv-qty-display {
+  flex: 1; text-align: center;
+  font-size: 14px; font-weight: 700; color: var(--ink1);
+}
+
+/* FAB */
+.inv-fab {
+  position: fixed; bottom: calc(var(--bottom-nav-height) + 16px); left: var(--container);
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--primary); color: white; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,80,203,0.4); transition: transform 150ms;
+}
+.inv-fab:active { transform: scale(0.92); }

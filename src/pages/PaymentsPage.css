@@ -113,3 +113,4 @@
 .payment-action:active { transform: scale(0.95); }
 
 .payment-action--mark { background: var(--success); border-color: var(--success); color: white; }
+.payment-action--sent { background: var(--success-soft); border-color: var(--success-soft); color: var(--success-ink); }

@@ -1,20 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { useApp } from '../context/AppContext';
 import './CreateQuotePage.css';
 
 const TABS = [
   { key: 'content', label: 'תוכן', step: 1 },
   { key: 'design', label: 'עיצוב', step: 2 },
   { key: 'send', label: 'שליחה', step: 3 },
-];
-
-const AI_ITEMS = [
-  { desc: 'פירוק ואריזת ריצוף קיים', qty: 1, unit: 'עבודה', price: 800 },
-  { desc: 'ריצוף חדר אמבטיה (אריחים 60×60)', qty: 8, unit: 'מ"ר', price: 320 },
-  { desc: 'הנחת אריחי קיר (גובה 2.4מ)', qty: 18, unit: 'מ"ר', price: 280 },
-  { desc: 'התקנת תא מקלחון פינתי', qty: 1, unit: 'יח"', price: 1200 },
-  { desc: 'חיבורי אינסטלציה', qty: 1, unit: 'עבודה', price: 1400 },
 ];
 
 const TEMPLATES = [
@@ -50,16 +43,114 @@ function WaveformBars({ recording }) {
   );
 }
 
+/* ── Catalog picker modal ── */
+function CatalogPicker({ inventory, onAdd, onClose }) {
+  const [search, setSearch] = useState('');
+  const [qtys, setQtys] = useState({});
+
+  const filtered = inventory.filter(item =>
+    item.name.includes(search) || item.category.includes(search) || item.sku.includes(search)
+  );
+
+  const getQty = (id) => qtys[id] ?? 1;
+  const setQty = (id, v) => setQtys(prev => ({ ...prev, [id]: Math.max(1, Number(v) || 1) }));
+
+  return (
+    <div className="catalog-overlay" onClick={onClose}>
+      <div className="catalog-sheet" onClick={e => e.stopPropagation()}>
+        <div className="catalog-sheet__header">
+          <div className="catalog-sheet__title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            בחר מהמלאי שלך
+          </div>
+          <button type="button" className="catalog-sheet__close" onClick={onClose}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div className="catalog-search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input
+            className="catalog-search"
+            placeholder="חפש פריט, קטגוריה, מק״ט..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            autoFocus
+          />
+        </div>
+
+        <div className="catalog-list">
+          {filtered.length === 0 && (
+            <div className="catalog-empty">לא נמצאו פריטים תואמים</div>
+          )}
+          {filtered.map(item => (
+            <div key={item.id} className="catalog-item">
+              <div className="catalog-item__info">
+                <div className="catalog-item__name">{item.name}</div>
+                <div className="catalog-item__meta">
+                  <span className="catalog-item__sku">{item.sku}</span>
+                  <span className="catalog-item__price">₪{item.price}/{item.unit}</span>
+                  <span className={`catalog-item__stock${item.qty <= item.minQty ? ' catalog-item__stock--low' : ''}`}>
+                    במלאי: {item.qty}
+                  </span>
+                </div>
+              </div>
+              <div className="catalog-item__add">
+                <input
+                  type="number"
+                  className="catalog-item__qty"
+                  value={getQty(item.id)}
+                  min="1"
+                  onChange={e => setQty(item.id, e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="catalog-item__btn"
+                  onClick={() => {
+                    onAdd({ desc: item.name, qty: getQty(item.id), unit: item.unit, price: item.price });
+                    onClose();
+                  }}
+                >
+                  הוסף
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CreateQuotePage() {
   const navigate = useNavigate();
+  const { addQuote, inventory } = useApp();
   const [activeTab, setActiveTab] = useState('content');
   const [recording, setRecording] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('clean');
   const [selectedAccent, setSelectedAccent] = useState('#0050CB');
   const [selectedChannel, setSelectedChannel] = useState('whatsapp');
   const [coverMsg, setCoverMsg] = useState('שלום! מצ"ב הצעת המחיר שהכנתי עבורך. אשמח לענות על כל שאלה.');
+  const [items, setItems] = useState([]);
+  const [showCatalog, setShowCatalog] = useState(false);
+  const [newItem, setNewItem] = useState({ desc: '', qty: 1, unit: 'יח\'', price: '' });
+  const [showManual, setShowManual] = useState(false);
+  const [clientName, setClientName] = useState('אבי כהן');
+  const [clientPhone, setClientPhone] = useState('050-1234567');
+  const [jobDesc, setJobDesc] = useState('');
 
-  const total = AI_ITEMS.reduce((s, i) => s + i.qty * i.price, 0);
+  const addItemFromCatalog = (item) => setItems(prev => [...prev, item]);
+
+  const addManualItem = () => {
+    if (!newItem.desc || !newItem.price) return;
+    setItems(prev => [...prev, { ...newItem, qty: Number(newItem.qty), price: Number(newItem.price) }]);
+    setNewItem({ desc: '', qty: 1, unit: 'יח\'', price: '' });
+    setShowManual(false);
+  };
+
+  const removeItem = (idx) => setItems(prev => prev.filter((_, i) => i !== idx));
+
+  const total = items.reduce((s, i) => s + i.qty * i.price, 0);
   const vat = Math.round(total * 0.17);
 
   const goNext = () => {
@@ -147,27 +238,67 @@ export default function CreateQuotePage() {
               </div>
             </div>
 
-            {/* AI items */}
+            {/* Items */}
             <div className="cq-block">
               <div className="cq-block__title">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-                פריטים (הוצע על ידי AI)
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                פריטים ({items.length})
               </div>
               <div className="cq-items">
-                {AI_ITEMS.map((item, i) => (
+                {items.length === 0 && (
+                  <div className="cq-items__empty">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    <span>עוד לא הוספת פריטים</span>
+                  </div>
+                )}
+                {items.map((item, i) => (
                   <div key={i} className="cq-item">
                     <div className="cq-item__desc">{item.desc}</div>
                     <div className="cq-item__meta">
                       <span className="cq-item__qty">{item.qty} {item.unit}</span>
                       <span className="cq-item__price">₪{(item.qty * item.price).toLocaleString()}</span>
+                      <button type="button" className="cq-item__remove" onClick={() => removeItem(i)}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
                     </div>
                   </div>
                 ))}
+
+                {/* Manual item form */}
+                {showManual && (
+                  <div className="cq-manual-form">
+                    <input className="input-field" placeholder="תיאור הפריט" value={newItem.desc} onChange={e => setNewItem(p => ({ ...p, desc: e.target.value }))} />
+                    <div className="cq-manual-row">
+                      <input className="input-field" placeholder="כמות" type="number" min="1" value={newItem.qty} onChange={e => setNewItem(p => ({ ...p, qty: e.target.value }))} style={{ width: 70 }} />
+                      <input className="input-field" placeholder="יח'" value={newItem.unit} onChange={e => setNewItem(p => ({ ...p, unit: e.target.value }))} style={{ width: 70 }} />
+                      <input className="input-field" placeholder="מחיר ₪" type="number" value={newItem.price} onChange={e => setNewItem(p => ({ ...p, price: e.target.value }))} style={{ flex: 1 }} />
+                    </div>
+                    <div className="cq-manual-actions">
+                      <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowManual(false)}>ביטול</button>
+                      <button type="button" className="btn btn--primary btn--sm" onClick={addManualItem} disabled={!newItem.desc || !newItem.price}>הוסף</button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="cq-items__add">
-                  <button type="button" className="btn btn--soft btn--sm">+ הוסף פריט</button>
+                  <button type="button" className="cq-add-catalog-btn" onClick={() => setShowCatalog(true)}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    בחר מהמלאי שלך
+                  </button>
+                  <button type="button" className="btn btn--soft btn--sm" onClick={() => setShowManual(true)}>
+                    + פריט ידני
+                  </button>
                 </div>
               </div>
             </div>
+
+            {showCatalog && (
+              <CatalogPicker
+                inventory={inventory || []}
+                onAdd={addItemFromCatalog}
+                onClose={() => setShowCatalog(false)}
+              />
+            )}
 
             {/* Summary */}
             <div className="cq-summary">
@@ -344,8 +475,27 @@ export default function CreateQuotePage() {
               המשך לשלב הבא
             </button>
           ) : (
-            <button type="button" className="btn btn--primary btn--lg btn--full" onClick={() => navigate('/quotes')}>
-              שלח הצעת מחיר
+            <button type="button" className="btn btn--primary btn--lg btn--full" onClick={() => {
+              const quoteNum = `#${String(Date.now()).slice(-6)}`;
+              const jobLabel = jobDesc || (items.length > 0 ? items[0].desc : 'עבודה כללית');
+              addQuote({
+                client: clientName,
+                job: jobLabel,
+                amount: `₪${(total + vat).toLocaleString()}`,
+                amountNum: total + vat,
+              });
+              navigate('/quote-preview', {
+                state: {
+                  client: clientName,
+                  clientPhone,
+                  job: jobLabel,
+                  items,
+                  accent: selectedAccent,
+                  quoteNum,
+                },
+              });
+            }}>
+              צור וצפה בהצעה
             </button>
           )}
         </div>

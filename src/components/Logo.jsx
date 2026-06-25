@@ -1,6 +1,6 @@
-export default function Logo({ size = 32, dark = false }) {
-  const bg = dark ? '#FFFFFF' : '#0050CB';
-  const fg = dark ? '#0050CB' : '#FFFFFF';
+export default function Logo({ size = 32, dark = false, white = false }) {
+  const bg = white ? 'rgba(255,255,255,0.18)' : dark ? '#FFFFFF' : '#0050CB';
+  const fg = white ? '#FFFFFF' : dark ? '#0050CB' : '#FFFFFF';
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -27,7 +27,7 @@ export default function Logo({ size = 32, dark = false }) {
         fontFamily: 'Rubik, sans-serif',
         fontWeight: 800,
         fontSize: size * 0.56,
-        color: dark ? '#FFFFFF' : '#131B2E',
+        color: white ? '#FFFFFF' : dark ? '#FFFFFF' : '#131B2E',
         letterSpacing: '-0.3px',
         lineHeight: 1,
       }}>

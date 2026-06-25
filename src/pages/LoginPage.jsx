@@ -1,6 +1,8 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import Footer from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 
 function GoogleLogo() {
@@ -22,29 +24,157 @@ function AppleLogo() {
   );
 }
 
+const FEATURES = [
+  { icon: '📋', text: 'הצעות מחיר', sub: 'תוך דקות' },
+  { icon: '📅', text: 'יומן חכם', sub: 'ביקורים ומסלולים' },
+  { icon: '💰', text: 'גבייה', sub: 'אוטומטית' },
+];
+
+const STATS = [
+  { val: '500+', label: 'מקצוענים' },
+  { val: '₪2.3M', label: 'נגבה החודש' },
+  { val: '4.8★', label: 'דירוג ממוצע' },
+];
+
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [resetResult, setResetResult] = useState(null);
+  const { resetPassword } = useAuth();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError('');
+    if (!email.trim() || !password) { setError('יש להזין אימייל וסיסמה'); return; }
+    setLoading(true);
+    setTimeout(() => {
+      const result = login(email, password);
+      setLoading(false);
+      if (result.ok) navigate('/dashboard');
+      else setError(result.error);
+    }, 600);
+  };
+
+  const handleForgot = (e) => {
+    e.preventDefault();
+    setResetResult(resetPassword(forgotEmail));
+  };
+
+  const handleOAuth = () => {
+    login('oauth@mypartner.co.il', 'OAuthPass1');
+    navigate('/dashboard');
+  };
+
+  if (forgotMode) {
+    return (
+      <div className="login-page">
+        <div className="login-hero">
+          <Logo size={32} white />
+        </div>
+        <div className="login-card">
+          <div className="login-heading">
+            <h1 className="text-h2">איפוס סיסמה</h1>
+            <p className="text-small text-mute">הזן את האימייל ונשלח לך את הסיסמה</p>
+          </div>
+          {resetResult && resetResult.ok ? (
+            <div className="login-reset-success">
+              <div className="login-reset-success__icon">✓</div>
+              <div className="login-reset-success__title">נמצאנו!</div>
+              <div className="login-reset-success__msg">הסיסמה שלך:</div>
+              <div className="login-reset-success__pw">{resetResult.password}</div>
+              <button type="button" className="btn btn--primary btn--lg btn--full" style={{ marginTop: 16 }}
+                onClick={() => { setForgotMode(false); setPassword(resetResult.password); setEmail(forgotEmail); setResetResult(null); }}>
+                חזור לכניסה
+              </button>
+            </div>
+          ) : (
+            <form className="login-form" onSubmit={handleForgot}>
+              {resetResult && !resetResult.ok && <div className="login-error">{resetResult.error}</div>}
+              <div className="login-field">
+                <label className="login-label">אימייל</label>
+                <div className="input-wrap">
+                  <input type="email" className="input-field" placeholder="you@example.com"
+                    value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} />
+                  <span className="input-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+              <button type="submit" className="btn btn--primary btn--lg btn--full" disabled={!forgotEmail.trim()}>שלח סיסמה</button>
+              <button type="button" className="btn btn--outline btn--lg btn--full" onClick={() => { setForgotMode(false); setResetResult(null); }}>חזור</button>
+            </form>
+          )}
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="login-page">
-      <div className="login-box">
-        <div className="login-logo">
-          <Logo size={34} />
+
+      {/* ── Marketing Hero ── */}
+      <div className="login-hero">
+        <div className="login-hero__top">
+          <Logo size={32} white />
+          <Link to="/pricing" className="login-hero__plans">תוכניות ומחירים</Link>
         </div>
 
+        <div className="login-hero__copy">
+          <h1 className="login-hero__title">
+            ניהול העסק שלך,<br />פשוט יותר
+          </h1>
+          <p className="login-hero__sub">
+            לידים, הצעות מחיר, חשבוניות, יומן וגבייה — הכל במקום אחד
+          </p>
+        </div>
+
+        <div className="login-hero__features">
+          {FEATURES.map((f) => (
+            <div key={f.text} className="login-hero__feat">
+              <span className="login-hero__feat-icon">{f.icon}</span>
+              <span className="login-hero__feat-text">{f.text}</span>
+              <span className="login-hero__feat-sub">{f.sub}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="login-hero__stats">
+          {STATS.map((s) => (
+            <div key={s.label} className="login-hero__stat">
+              <span className="login-hero__stat-val">{s.val}</span>
+              <span className="login-hero__stat-label">{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Login Card ── */}
+      <div className="login-card">
         <div className="login-heading">
-          <h1 className="text-h2">כניסה לחשבון</h1>
+          <h2 className="text-h2">כניסה לחשבון</h2>
           <p className="text-small text-mute">ברוך הבא חזרה</p>
         </div>
 
-        <form className="login-form" onSubmit={(e) => e.preventDefault()}>
+        <form className="login-form" onSubmit={handleSubmit}>
+          {error && <div className="login-error">{error}</div>}
+
           <div className="login-field">
             <label className="login-label">אימייל</label>
             <div className="input-wrap">
-              <input
-                type="email"
-                className="input-field"
-                placeholder="you@example.com"
-                autoComplete="email"
-              />
+              <input type="email" className="input-field" placeholder="you@example.com" autoComplete="email"
+                value={email} onChange={(e) => { setEmail(e.target.value); setError(''); }} />
               <span className="input-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -57,27 +187,26 @@ export default function LoginPage() {
           <div className="login-field">
             <div className="login-label-row">
               <label className="login-label">סיסמה</label>
-              <button type="button" className="login-forgot">שכחתי סיסמה</button>
+              <button type="button" className="login-forgot" onClick={() => { setForgotMode(true); setForgotEmail(email); }}>
+                שכחתי סיסמה
+              </button>
             </div>
             <div className="input-wrap">
-              <input
-                type="password"
-                className="input-field"
-                placeholder="••••••••"
-                autoComplete="current-password"
-              />
-              <span className="input-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-              </span>
+              <input type={showPass ? 'text' : 'password'} className="input-field" placeholder="••••••••"
+                autoComplete="current-password" value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(''); }} />
+              <button type="button" className="input-icon input-icon--btn" onClick={() => setShowPass(v => !v)}>
+                {showPass
+                  ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                }
+              </button>
             </div>
           </div>
 
-          <Link to="/dashboard" className="btn btn--primary btn--lg btn--full">
-            כנס לחשבון
-          </Link>
+          <button type="submit" className="btn btn--primary btn--lg btn--full" disabled={loading}>
+            {loading ? 'מתחבר...' : 'כנס לחשבון'}
+          </button>
         </form>
 
         <div className="login-divider">
@@ -87,21 +216,16 @@ export default function LoginPage() {
         </div>
 
         <div className="login-oauth">
-          <Link to="/dashboard" className="login-oauth-btn">
-            <GoogleLogo />
-            <span>Google</span>
-          </Link>
-          <Link to="/dashboard" className="login-oauth-btn">
-            <AppleLogo />
-            <span>Apple</span>
-          </Link>
+          <button type="button" className="login-oauth-btn" onClick={handleOAuth}><GoogleLogo /><span>Google</span></button>
+          <button type="button" className="login-oauth-btn" onClick={handleOAuth}><AppleLogo /><span>Apple</span></button>
         </div>
 
         <p className="login-signup">
           אין לך חשבון עדיין?{' '}
-          <Link to="/onboarding" className="login-signup__link">התחל עכשיו</Link>
+          <Link to="/register" className="login-signup__link">התחל עכשיו — חינם</Link>
         </p>
       </div>
+
       <Footer />
     </div>
   );

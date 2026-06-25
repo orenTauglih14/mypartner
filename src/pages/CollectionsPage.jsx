@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import './CollectionsPage.css';
 
@@ -60,8 +62,25 @@ function CashflowChart() {
 }
 
 export default function CollectionsPage() {
+  const navigate = useNavigate();
+  const [collected, setCollected] = useState(COLLECTED);
+  const [debtors, setDebtors] = useState(DEBTORS);
+  const [activity, setActivity] = useState(ACTIVITY);
+  const progress = Math.round((collected / TARGET) * 100);
+
+  const handleCollect = (debtor) => {
+    setDebtors((prev) => prev.filter((d) => d.rank !== debtor.rank));
+    const amount = parseInt(debtor.amount.replace(/[^0-9]/g, ''));
+    setCollected((prev) => Math.min(prev + amount, TARGET));
+    setActivity((prev) => [
+      { text: `${debtor.name} שילם ${debtor.amount}`, time: 'עכשיו', type: 'payment' },
+      ...prev,
+    ]);
+  };
+
   return (
     <Layout title="גבייה" mainClass="collections-page">
+
 
         {/* Hero target */}
         <div className="px-container collections-hero">
@@ -78,20 +97,20 @@ export default function CollectionsPage() {
                     cx="32" cy="32" r="26" fill="none"
                     stroke="white" strokeWidth="6"
                     strokeDasharray={`${2 * Math.PI * 26}`}
-                    strokeDashoffset={`${2 * Math.PI * 26 * (1 - PROGRESS / 100)}`}
+                    strokeDashoffset={`${2 * Math.PI * 26 * (1 - progress / 100)}`}
                     strokeLinecap="round"
                     transform="rotate(-90 32 32)"
                   />
-                  <text x="32" y="37" textAnchor="middle" fill="white" fontSize="14" fontWeight="800" fontFamily="Rubik">{PROGRESS}%</text>
+                  <text x="32" y="37" textAnchor="middle" fill="white" fontSize="14" fontWeight="800" fontFamily="Rubik">{progress}%</text>
                 </svg>
               </div>
             </div>
             <div className="progress-bar" style={{ background: 'rgba(255,255,255,0.2)' }}>
-              <div className="progress-bar__fill" style={{ width: `${PROGRESS}%`, background: 'white' }} />
+              <div className="progress-bar__fill" style={{ width: `${progress}%`, background: 'white' }} />
             </div>
             <div className="collections-hero-card__bottom">
-              <span>₪{COLLECTED.toLocaleString()} נגבה</span>
-              <span>₪{(TARGET - COLLECTED).toLocaleString()} נותר</span>
+              <span>₪{collected.toLocaleString()} נגבה</span>
+              <span>₪{(TARGET - collected).toLocaleString()} נותר</span>
             </div>
           </div>
         </div>
@@ -125,7 +144,10 @@ export default function CollectionsPage() {
         <div className="px-container collections-debtors">
           <div className="collections-section-title">חייבים עיקריים</div>
           <div className="debtors-list">
-            {DEBTORS.map((d) => (
+            {debtors.length === 0 && (
+              <div className="text-caption text-mute" style={{ padding: '12px 0' }}>אין חייבים כרגע</div>
+            )}
+            {debtors.map((d) => (
               <div key={d.rank} className="debtor-row">
                 <div className="debtor-rank">#{d.rank}</div>
                 <div className="debtor-avatar">{d.initials}</div>
@@ -134,7 +156,7 @@ export default function CollectionsPage() {
                   <div className="debtor-days">{d.days} ימים ללא תשלום</div>
                 </div>
                 <div className="debtor-amount">{d.amount}</div>
-                <button type="button" className="debtor-action">גבה</button>
+                <button type="button" className="debtor-action" onClick={() => handleCollect(d)}>גבה</button>
               </div>
             ))}
           </div>
@@ -144,7 +166,7 @@ export default function CollectionsPage() {
         <div className="px-container collections-activity">
           <div className="collections-section-title">פעילות אחרונה</div>
           <div className="activity-feed">
-            {ACTIVITY.map((a, i) => (
+            {activity.map((a, i) => (
               <div key={i} className="activity-item">
                 <div className={`activity-icon activity-icon--${a.type}`}>
                   {a.type === 'reminder' && (

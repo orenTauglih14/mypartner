@@ -1,0 +1,138 @@
+/* Wrapper */
+.sigpad {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+/* Canvas area */
+.sigpad__canvas-wrap {
+  position: relative;
+  border: 1.5px dashed #C8CCDA;
+  border-radius: 8px;
+  background: #FAFBFD;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.sigpad__canvas {
+  display: block;
+  width: 100%;
+  height: 110px;
+}
+
+.sigpad__hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #C0C6D8;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Action buttons */
+.sigpad__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.sigpad__btn {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-family: var(--font-body, 'Rubik', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 120ms;
+}
+.sigpad__btn:disabled { opacity: 0.4; cursor: default; }
+.sigpad__btn:active:not(:disabled) { transform: scale(0.95); }
+
+.sigpad__btn--clear {
+  background: #F0F2F8;
+  color: #5A6580;
+  border: 1px solid #D0D4E8;
+}
+
+.sigpad__btn--save {
+  background: var(--primary, #0050CB);
+  color: #fff;
+}
+
+/* Label row */
+.sigpad__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #8892A4;
+  text-align: center;
+}
+
+/* Signed state */
+.sigpad--signed {}
+
+.sigpad__signed-img-wrap {
+  border: 1.5px solid #E2E5F2;
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px 12px;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sigpad__signed-img {
+  max-width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+}
+
+.sigpad__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.sigpad__retake {
+  background: none;
+  border: none;
+  font-family: var(--font-body, 'Rubik', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary, #0050CB);
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Print line placeholder */
+.sigpad__print-line {
+  display: none;
+  height: 1px;
+  background: #C8CCDA;
+  margin: 10px 0 4px;
+}
+
+/* Print rules */
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+
+  .sigpad__canvas-wrap { display: none; }
+  .sigpad__actions { display: none; }
+  .sigpad__print-line { display: block; }
+
+  .sigpad--signed .sigpad__signed-img-wrap { border-color: transparent; padding: 0; }
+  .sigpad--signed .sigpad__signed-img { max-height: 70px; }
+}
