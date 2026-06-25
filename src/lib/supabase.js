@@ -5,6 +5,8 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
 export const isConfigured = !!(url && key && url.startsWith('https://') && !url.includes('xxxxxxxxxxxx'))
 
+console.log('[Supabase] isConfigured:', isConfigured, '| URL:', url ? url.slice(0, 35) + '…' : '(empty)')
+
 // createClient throws if url is empty — use placeholder when not configured
 export const supabase = createClient(
   url || 'https://placeholder.supabase.co',
