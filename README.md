@@ -13,6 +13,17 @@ https://mypartner-one.vercel.app/
 GitHub URL:
 https://github.com/orenTauglil14/mypartner
 
+## Demo Access
+
+To test the app without registering, use the following credentials:
+
+| Field    | Value               |
+| -------- | ------------------- |
+| Email    | demo@mypartner.co.il |
+| Password | demo123456          |
+
+Or register a new account — demo data (customers, quotes, invoices) is seeded automatically on first login.
+
 ## Product Definition
 
 ### Problem
@@ -22,15 +33,22 @@ This makes it difficult to quickly understand what is happening in the business.
 
 ### Target Audience
 
-Small business owners and independent service providers who need a simple digital assistant for business management.
+Small business owners and independent service providers (plumbers, electricians, contractors, etc.) who need a simple digital assistant for daily business management on mobile.
 
 ### Value
 
-MyPartner provides a friendly AI assistant experience that allows the user to ask questions about the business and receive simple, clear answers in Hebrew.
+MyPartner provides a friendly AI assistant (ראובן) that allows the user to ask questions about the business and receive simple, clear answers in Hebrew — without navigating through complex menus.
 
-### Differentiation
+### Competitors and Differentiation
 
-Unlike a regular CRM or dashboard, MyPartner focuses on a conversational AI experience, allowing the user to ask natural questions instead of manually searching through tables.
+| Competitor | Type | Limitation |
+| --- | --- | --- |
+| Excel / Google Sheets | Manual tracking | No automation, no mobile experience, requires setup |
+| WhatsApp groups | Communication | No structure, no data, no reminders |
+| Zoho / Monday.com | CRM platforms | Complex, expensive, English-first, not mobile-focused |
+| Generic invoice apps | Single-purpose | No AI, no CRM, no full business view |
+
+**MyPartner's differentiation:** Hebrew-first conversational AI built specifically for Israeli independent service providers — combines CRM, quotes, invoices, inventory and suppliers in one mobile-first app with a smart AI assistant at the center.
 
 ## Main Features
 

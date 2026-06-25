@@ -1,65 +1,109 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { supabase, isConfigured } from '../lib/supabase';
+
+const AuthContext = createContext(null);
 
 const STORAGE_USER = 'mp_user';
 const STORAGE_AUTH = 'mp_auth';
 
-const AuthContext = createContext(null);
-
 export function AuthProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem(STORAGE_AUTH));
-  const [currentUser, setCurrentUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_USER)) || null; } catch { return null; }
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authReady, setAuthReady] = useState(!isConfigured);
 
-  const login = (email, password) => {
-    if (!email.trim() || password.length < 6) {
-      return { ok: false, error: 'יש להזין אימייל וסיסמה (לפחות 6 תווים)' };
-    }
-    const stored = (() => {
-      try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; }
-    })();
-
-    // If user registered, validate against stored credentials
-    if (stored && stored.email) {
-      if (email.trim().toLowerCase() !== stored.email.toLowerCase()) {
-        return { ok: false, error: 'אימייל או סיסמה שגויים' };
-      }
-      if (stored.password && password !== stored.password) {
-        return { ok: false, error: 'אימייל או סיסמה שגויים' };
-      }
+  useEffect(() => {
+    if (!isConfigured) {
+      const loggedIn = !!localStorage.getItem(STORAGE_AUTH);
+      const user = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; } })();
+      setIsLoggedIn(loggedIn);
+      setCurrentUser(user);
+      return;
     }
 
-    // Save / update user session
-    const user = stored || { email: email.trim(), name: email.split('@')[0] };
-    localStorage.setItem(STORAGE_AUTH, 'true');
-    localStorage.setItem(STORAGE_USER, JSON.stringify(user));
-    setCurrentUser(user);
-    setIsLoggedIn(true);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+      setCurrentUser(session?.user ?? null);
+      setAuthReady(true);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+      setCurrentUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email, password) => {
+    if (!isConfigured) {
+      if (!email.trim() || password.length < 6) return { ok: false, error: 'יש להזין אימייל וסיסמה' };
+      const stored = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; } })();
+      if (stored?.email && email.trim().toLowerCase() !== stored.email.toLowerCase()) return { ok: false, error: 'אימייל או סיסמה שגויים' };
+      if (stored?.password && password !== stored.password) return { ok: false, error: 'אימייל או סיסמה שגויים' };
+      const user = stored || { email: email.trim(), name: email.split('@')[0] };
+      localStorage.setItem(STORAGE_AUTH, 'true');
+      localStorage.setItem(STORAGE_USER, JSON.stringify(user));
+      setCurrentUser(user);
+      setIsLoggedIn(true);
+      return { ok: true };
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (error) return { ok: false, error: 'אימייל או סיסמה שגויים' };
     return { ok: true };
   };
 
-  const register = (user) => {
-    const saved = { ...user, email: user.email.trim().toLowerCase() };
-    localStorage.setItem(STORAGE_USER, JSON.stringify(saved));
-    localStorage.setItem(STORAGE_AUTH, 'true');
-    setCurrentUser(saved);
-    setIsLoggedIn(true);
-  };
-
-  const logout = () => {
-    localStorage.removeItem(STORAGE_AUTH);
-    setIsLoggedIn(false);
-  };
-
-  const resetPassword = (email) => {
-    const stored = (() => {
-      try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; }
-    })();
-    if (stored && email.trim().toLowerCase() === stored.email?.toLowerCase()) {
-      return { ok: true, password: stored.password || '(כנס עם כל סיסמה)' };
+  const register = async (userData) => {
+    if (!isConfigured) {
+      const saved = { ...userData, email: userData.email.trim().toLowerCase() };
+      localStorage.setItem(STORAGE_USER, JSON.stringify(saved));
+      localStorage.setItem(STORAGE_AUTH, 'true');
+      setCurrentUser(saved);
+      setIsLoggedIn(true);
+      return { ok: true, confirmed: true };
     }
-    return { ok: false, error: 'האימייל לא נמצא במערכת' };
+
+    const { data, error } = await supabase.auth.signUp({
+      email: userData.email.trim(),
+      password: userData.password,
+      options: {
+        data: {
+          full_name: userData.name,
+          profession: userData.profession,
+          phone: userData.phone,
+        },
+      },
+    });
+    if (error) return { ok: false, error: error.message };
+    if (data.session) return { ok: true, confirmed: true };
+    return { ok: true, confirmed: false };
   };
+
+  const logout = async () => {
+    if (!isConfigured) {
+      localStorage.removeItem(STORAGE_AUTH);
+      setIsLoggedIn(false);
+      setCurrentUser(null);
+      return;
+    }
+    await supabase.auth.signOut();
+  };
+
+  const resetPassword = async (email) => {
+    if (!isConfigured) {
+      const stored = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; } })();
+      if (stored && email.trim().toLowerCase() === stored.email?.toLowerCase()) {
+        return { ok: true, password: stored.password || '(כנס עם כל סיסמה)' };
+      }
+      return { ok: false, error: 'האימייל לא נמצא במערכת' };
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+    if (error) return { ok: false, error: 'שגיאה בשליחת איפוס סיסמה' };
+    return { ok: true, emailSent: true };
+  };
+
+  if (!authReady) return null;
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, currentUser, login, register, logout, resetPassword }}>

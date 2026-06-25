@@ -48,20 +48,45 @@ export default function RegisterPage() {
     password: '',
   });
   const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
 
   const field = (key) => ({
     value: form[key],
-    onChange: (e) => setForm((f) => ({ ...f, [key]: e.target.value })),
+    onChange: (e) => { setForm((f) => ({ ...f, [key]: e.target.value })); setError(''); },
   });
 
   const canSubmit = form.name.trim() && form.email.trim() && form.phone.trim() && form.profession && form.password.length >= 6;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!canSubmit) return;
-    register(form);
+    setLoading(true);
+    const result = await register(form);
+    setLoading(false);
+    if (!result.ok) { setError(result.error || 'שגיאה בהרשמה, נסה שנית'); return; }
+    if (result.confirmed === false) { setEmailSent(true); return; }
     navigate('/onboarding');
   };
+
+  if (emailSent) {
+    return (
+      <div className="register-page">
+        <div className="register-box" style={{ textAlign: 'center', padding: '40px 24px' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>✉️</div>
+          <h2 className="text-h2" style={{ marginBottom: 8 }}>בדוק את האימייל שלך</h2>
+          <p className="text-small text-mute" style={{ marginBottom: 24 }}>
+            שלחנו קישור אימות לכתובת <strong>{form.email}</strong>.<br />
+            לחץ על הקישור ואז חזור לכניסה.
+          </p>
+          <button type="button" className="btn btn--primary btn--lg btn--full" onClick={() => navigate('/login')}>
+            לדף הכניסה
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="register-page">
@@ -94,6 +119,7 @@ export default function RegisterPage() {
         </div>
 
         <form className="register-form" onSubmit={handleSubmit}>
+          {error && <div className="login-error" style={{ marginBottom: 12 }}>{error}</div>}
           <div className="register-field">
             <label className="register-label">שם מלא *</label>
             <div className="input-wrap">
@@ -197,9 +223,9 @@ export default function RegisterPage() {
           <button
             type="submit"
             className="btn btn--primary btn--lg btn--full"
-            disabled={!canSubmit}
+            disabled={!canSubmit || loading}
           >
-            צור חשבון חינמי
+            {loading ? 'יוצר חשבון...' : 'צור חשבון חינמי'}
           </button>
 
           <p className="register-terms">

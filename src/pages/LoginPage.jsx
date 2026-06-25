@@ -51,22 +51,21 @@ export default function LoginPage() {
   const [resetResult, setResetResult] = useState(null);
   const { resetPassword } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     if (!email.trim() || !password) { setError('יש להזין אימייל וסיסמה'); return; }
     setLoading(true);
-    setTimeout(() => {
-      const result = login(email, password);
-      setLoading(false);
-      if (result.ok) navigate('/dashboard');
-      else setError(result.error);
-    }, 600);
+    const result = await login(email, password);
+    setLoading(false);
+    if (result.ok) navigate('/dashboard');
+    else setError(result.error);
   };
 
-  const handleForgot = (e) => {
+  const handleForgot = async (e) => {
     e.preventDefault();
-    setResetResult(resetPassword(forgotEmail));
+    const result = await resetPassword(forgotEmail);
+    setResetResult(result);
   };
 
   const handleOAuth = () => {

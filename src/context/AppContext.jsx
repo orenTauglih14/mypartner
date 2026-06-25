@@ -1,5 +1,7 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { supabase, isConfigured } from '../lib/supabase';
 
+// ─── Dummy seed data ──────────────────────────────────────────────────────────
 const INIT_LEADS = [
   { id: 1, name: 'אברהם כהן', jobType: 'תיקון נזילה', date: '12 באוקטובר', phone: '050-1234567', status: 'חדש', hot: true },
   { id: 2, name: 'נועה לוי', jobType: 'התקנת דוד', date: '10 באוקטובר', phone: '052-9876543', status: 'בטיפול', hot: false },
@@ -31,74 +33,24 @@ const INIT_PAYMENTS = [
 ];
 
 const INIT_EVENTS = [
-  // יום א׳ (index 0)
   { id: 10, dayIndex: 0, time: '10:00', endTime: '11:30', name: 'דוד לוי', job: 'בדיקת דוד שמש', address: 'רוטשילד 22, תל אביב', phone: '052-1111222', status: 'done', statusLabel: 'הושלם', amount: '₪600' },
-  // יום ב׳ (index 1)
   { id: 11, dayIndex: 1, time: '09:30', endTime: '11:00', name: 'רחל שמש', job: 'התקנת ברז מטבח', address: 'הנביאים 5, ירושלים', phone: '053-3334444', status: 'done', statusLabel: 'הושלם', amount: '₪350' },
   { id: 12, dayIndex: 1, time: '14:00', endTime: '15:30', name: 'יעקב אברהם', job: 'תיקון אסלה', address: 'בגין 88, רמת גן', phone: '054-7778888', status: 'done', statusLabel: 'הושלם', amount: '₪480' },
-  // יום ג׳ (index 2)
   { id: 13, dayIndex: 2, time: '11:00', endTime: '12:30', name: 'חנה כץ', job: 'פריקת מים קשים', address: 'הרצוג 3, פתח תקווה', phone: '050-9990000', status: 'done', statusLabel: 'הושלם', amount: '₪720' },
-  // יום ד׳ (index 3) — "היום"
   { id: 1, dayIndex: 3, time: '09:00', endTime: '10:30', name: 'אבי כהן', job: 'תיקון נזילה', address: 'הרצל 12, תל אביב', phone: '050-1234567', status: 'done', statusLabel: 'הושלם', amount: '₪850' },
   { id: 2, dayIndex: 3, time: '11:30', endTime: '13:00', name: 'מיכל לוי', job: 'פגישת ייעוץ ראשונית', address: 'ביאליק 5, רמת גן', phone: '052-9876543', status: 'active', statusLabel: 'בביצוע', amount: '₪0' },
   { id: 3, dayIndex: 3, time: '14:00', endTime: '15:30', name: 'יוסי מזרחי', job: 'בדיקת לחץ מים', address: 'בן גוריון 88, חולון', phone: '054-5544433', status: 'waiting', statusLabel: 'ממתין', amount: '₪400' },
   { id: 4, dayIndex: 3, time: '16:30', endTime: '18:00', name: 'שרה גולדברג', job: 'התקנת מקלחון', address: 'ויצמן 3, פתח תקווה', phone: '052-8765432', status: 'waiting', statusLabel: 'ממתין', amount: '₪1,200' },
-  // יום ה׳ (index 4)
   { id: 14, dayIndex: 4, time: '08:30', endTime: '10:00', name: 'משה פרידמן', job: 'החלפת צינורות', address: 'ז׳בוטינסקי 44, ב״ב', phone: '058-5556666', status: 'waiting', statusLabel: 'ממתין', amount: '₪1,400' },
   { id: 15, dayIndex: 4, time: '13:00', endTime: '14:30', name: 'לאה גולן', job: 'סתימה בכיור', address: 'סוקולוב 12, חולון', phone: '052-4445555', status: 'waiting', statusLabel: 'ממתין', amount: '₪320' },
-  // יום ו׳ (index 5)
   { id: 16, dayIndex: 5, time: '09:00', endTime: '10:00', name: 'שמשון גרין', job: 'בדיקה לפני שבת', address: 'אחד העם 7, תל אביב', phone: '054-2223333', status: 'waiting', statusLabel: 'ממתין', amount: '₪200' },
-  // שבת (index 6) — ריק
 ];
 
 const INIT_INVOICES = [
-  {
-    id: 'INV-00124', type: 'חשבונית מס/קבלה',
-    client: 'מיכל ברק', clientPhone: '054-9988776', clientVAT: '',
-    job: 'תיקון דוד שמש והחלפת אנוד',
-    items: [
-      { desc: 'בדיקת מערכת דוד שמש', qty: 1, unit: 'עבודה', price: 350 },
-      { desc: 'החלפת אנוד מגנזיום', qty: 1, unit: 'יח\'', price: 280 },
-    ],
-    subtotal: 630, vat: 107, total: 737,
-    status: 'paid', date: '10 ביוני 2026', quoteRef: '#001247', paymentMethod: 'ביט',
-  },
-  {
-    id: 'INV-00123', type: 'חשבונית מס',
-    client: 'אבי כהן', clientPhone: '050-1234567', clientVAT: '',
-    job: 'שיפוץ חדר אמבטיה מלא',
-    items: [
-      { desc: 'פירוק ריצוף קיים', qty: 1, unit: 'עבודה', price: 800 },
-      { desc: 'ריצוף חדר אמבטיה', qty: 8, unit: 'מ"ר', price: 320 },
-      { desc: 'אריחי קיר', qty: 18, unit: 'מ"ר', price: 280 },
-      { desc: 'התקנת מקלחון', qty: 1, unit: 'יח\'', price: 1200 },
-      { desc: 'חיבורי אינסטלציה', qty: 1, unit: 'עבודה', price: 1400 },
-    ],
-    subtotal: 12960, vat: 2203, total: 15163,
-    status: 'sent', date: '12 ביוני 2026', quoteRef: '#001248', paymentMethod: 'העברה בנקאית',
-  },
-  {
-    id: 'INV-00122', type: 'קבלה',
-    client: 'שרה גולדברג', clientPhone: '052-8765432', clientVAT: '',
-    job: 'החלפת ברזים',
-    items: [
-      { desc: 'החלפת ברז מטבח', qty: 1, unit: 'יח\'', price: 600 },
-      { desc: 'עבודה', qty: 1, unit: 'שעות', price: 600 },
-    ],
-    subtotal: 1025, vat: 174, total: 1199,
-    status: 'paid', date: '5 ביוני 2026', quoteRef: '', paymentMethod: 'מזומן',
-  },
-  {
-    id: 'INV-00121', type: 'חשבונית מס',
-    client: 'יצחק פרץ', clientPhone: '058-4433221', clientVAT: '',
-    job: 'בדיקת מערכת ניקוז',
-    items: [
-      { desc: 'בדיקת ניקוז ואבחון', qty: 1, unit: 'עבודה', price: 450 },
-      { desc: 'שחרור סתימה', qty: 1, unit: 'יח\'', price: 320 },
-    ],
-    subtotal: 770, vat: 131, total: 901,
-    status: 'overdue', date: '1 ביוני 2026', quoteRef: '', paymentMethod: 'צ׳ק',
-  },
+  { id: 'INV-00124', type: 'חשבונית מס/קבלה', client: 'מיכל ברק', clientPhone: '054-9988776', clientVAT: '', job: 'תיקון דוד שמש והחלפת אנוד', items: [{ desc: 'בדיקת מערכת דוד שמש', qty: 1, unit: 'עבודה', price: 350 }, { desc: 'החלפת אנוד מגנזיום', qty: 1, unit: 'יח\'', price: 280 }], subtotal: 630, vat: 107, total: 737, status: 'paid', date: '10 ביוני 2026', quoteRef: '#001247', paymentMethod: 'ביט' },
+  { id: 'INV-00123', type: 'חשבונית מס', client: 'אבי כהן', clientPhone: '050-1234567', clientVAT: '', job: 'שיפוץ חדר אמבטיה מלא', items: [{ desc: 'פירוק ריצוף קיים', qty: 1, unit: 'עבודה', price: 800 }, { desc: 'ריצוף חדר אמבטיה', qty: 8, unit: 'מ"ר', price: 320 }, { desc: 'אריחי קיר', qty: 18, unit: 'מ"ר', price: 280 }, { desc: 'התקנת מקלחון', qty: 1, unit: 'יח\'', price: 1200 }, { desc: 'חיבורי אינסטלציה', qty: 1, unit: 'עבודה', price: 1400 }], subtotal: 12960, vat: 2203, total: 15163, status: 'sent', date: '12 ביוני 2026', quoteRef: '#001248', paymentMethod: 'העברה בנקאית' },
+  { id: 'INV-00122', type: 'קבלה', client: 'שרה גולדברג', clientPhone: '052-8765432', clientVAT: '', job: 'החלפת ברזים', items: [{ desc: 'החלפת ברז מטבח', qty: 1, unit: 'יח\'', price: 600 }, { desc: 'עבודה', qty: 1, unit: 'שעות', price: 600 }], subtotal: 1025, vat: 174, total: 1199, status: 'paid', date: '5 ביוני 2026', quoteRef: '', paymentMethod: 'מזומן' },
+  { id: 'INV-00121', type: 'חשבונית מס', client: 'יצחק פרץ', clientPhone: '058-4433221', clientVAT: '', job: 'בדיקת מערכת ניקוז', items: [{ desc: 'בדיקת ניקוז ואבחון', qty: 1, unit: 'עבודה', price: 450 }, { desc: 'שחרור סתימה', qty: 1, unit: 'יח\'', price: 320 }], subtotal: 770, vat: 131, total: 901, status: 'overdue', date: '1 ביוני 2026', quoteRef: '', paymentMethod: 'צ׳ק' },
 ];
 
 const INIT_SUPPLIERS = [
@@ -133,6 +85,56 @@ const INIT_REMINDERS = [
   { id: 4, client: 'יצחק פרץ', type: 'תזכורת תשלום', channel: 'WhatsApp', nextSend: 'בעוד 5 ימים', lastSent: 'לפני חודש', active: true, count: 5 },
 ];
 
+// ─── DB mapping helpers ───────────────────────────────────────────────────────
+const fromDBCustomer = (r) => ({ ...r, lastVisit: r.last_visit, rating: Number(r.rating) });
+const toDBCustomer = (c, bizId) => ({
+  business_id: bizId, name: c.name, phone: c.phone || '', email: c.email || '',
+  address: c.address || '', status: c.status || 'active', visits: c.visits || 0,
+  revenue: c.revenue || '₪0', rating: c.rating || 5.0,
+  last_visit: c.lastVisit || 'היום', initials: c.initials || (c.name || '?').slice(0, 2),
+});
+
+const fromDBLead = (r) => ({ ...r, jobType: r.job_type });
+const toDBLead = (l, bizId) => ({
+  business_id: bizId, name: l.name, job_type: l.jobType || l.job_type || '',
+  phone: l.phone || '', date: l.date || 'היום', status: l.status || 'חדש', hot: l.hot || false,
+});
+
+const fromDBQuote = (r) => ({ ...r, amountNum: Number(r.amount_num), statusLabel: r.status_label, clientPhone: r.client_phone });
+const toDBQuote = (q, bizId) => ({
+  id: q.id, business_id: bizId, client: q.client, client_phone: q.clientPhone || '',
+  job: q.job || '', amount: q.amount || '₪0', amount_num: q.amountNum || 0,
+  status: q.status || 'open', status_label: q.statusLabel || 'פתוח',
+  date: q.date || 'היום', viewed: q.viewed || false, hot: q.hot || false, items: q.items || [],
+});
+
+const fromDBInvoice = (r) => ({
+  ...r, clientPhone: r.client_phone, clientVAT: r.client_vat || '',
+  quoteRef: r.quote_ref || '', paymentMethod: r.payment_method || '',
+});
+const toDBInvoice = (inv, bizId) => ({
+  id: inv.id, business_id: bizId, type: inv.type, client: inv.client || '',
+  client_phone: inv.clientPhone || '', client_vat: inv.clientVAT || '',
+  job: inv.job || '', items: inv.items || [], subtotal: inv.subtotal || 0,
+  vat: inv.vat || 0, total: inv.total || 0, status: inv.status || 'sent',
+  date: inv.date || 'היום', quote_ref: inv.quoteRef || '', payment_method: inv.paymentMethod || '',
+});
+
+const fromDBSupplier = (r) => ({ ...r, lastOrder: r.last_order || '' });
+const toDBSupplier = (s, bizId) => ({
+  business_id: bizId, name: s.name, contact: s.contact || '', phone: s.phone || '',
+  specialty: s.specialty || '', rating: s.rating || 5.0,
+  last_order: s.lastOrder || s.last_order || 'היום', terms: s.terms || '', category: s.category || '',
+});
+
+const fromDBInventory = (r) => ({ ...r, minQty: r.min_qty });
+const toDBInventory = (item, bizId) => ({
+  business_id: bizId, name: item.name, sku: item.sku || '', qty: item.qty || 0,
+  min_qty: item.minQty || 0, unit: item.unit || 'יח\'',
+  price: item.price || 0, supplier: item.supplier || '', category: item.category || '',
+});
+
+// ─── Context ──────────────────────────────────────────────────────────────────
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
@@ -147,74 +149,198 @@ export function AppProvider({ children }) {
   const [inventory, setInventory] = useState(INIT_INVENTORY);
   const [purchaseOrders, setPurchaseOrders] = useState(INIT_PURCHASE_ORDERS);
 
+  const bizIdRef = useRef(null);
+
+  // ── Supabase data loading ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (!isConfigured) return;
+
+    const loadBusiness = async (user) => {
+      let { data: biz } = await supabase
+        .from('businesses')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!biz) {
+        const { data: created } = await supabase
+          .from('businesses')
+          .insert({
+            user_id: user.id,
+            name: user.user_metadata?.full_name || 'העסק שלי',
+            profession: user.user_metadata?.profession || '',
+            phone: user.user_metadata?.phone || '',
+            email: user.email,
+          })
+          .select('id')
+          .single();
+        biz = created;
+      }
+
+      if (!biz) return;
+      bizIdRef.current = biz.id;
+      await loadAll(biz.id);
+    };
+
+    const loadAll = async (bizId) => {
+      const [
+        { data: custs },
+        { data: lds },
+        { data: qts },
+        { data: invs },
+        { data: sups },
+        { data: inv },
+      ] = await Promise.all([
+        supabase.from('customers').select('*').eq('business_id', bizId).order('created_at', { ascending: false }),
+        supabase.from('leads').select('*').eq('business_id', bizId).order('created_at', { ascending: false }),
+        supabase.from('quotes').select('*').eq('business_id', bizId).order('created_at', { ascending: false }),
+        supabase.from('invoices').select('*').eq('business_id', bizId).order('created_at', { ascending: false }),
+        supabase.from('suppliers').select('*').eq('business_id', bizId).order('created_at', { ascending: false }),
+        supabase.from('inventory').select('*').eq('business_id', bizId).order('created_at', { ascending: false }),
+      ]);
+
+      // Seed demo data on first login (empty business)
+      if (custs !== null && custs.length === 0 && lds !== null && lds.length === 0) {
+        await seedDemo(bizId);
+        return;
+      }
+
+      if (custs?.length) setCustomers(custs.map(fromDBCustomer));
+      if (lds?.length) setLeads(lds.map(fromDBLead));
+      if (qts?.length) setQuotes(qts.map(fromDBQuote));
+      if (invs?.length) setInvoices(invs.map(fromDBInvoice));
+      if (sups?.length) setSuppliers(sups.map(fromDBSupplier));
+      if (inv?.length) setInventory(inv.map(fromDBInventory));
+    };
+
+    const seedDemo = async (bizId) => {
+      await Promise.all([
+        supabase.from('customers').insert(INIT_CUSTOMERS.map(c => toDBCustomer(c, bizId))),
+        supabase.from('leads').insert(INIT_LEADS.map(l => toDBLead(l, bizId))),
+        supabase.from('quotes').insert(INIT_QUOTES.map(q => toDBQuote(q, bizId))),
+        supabase.from('invoices').insert(INIT_INVOICES.map(i => toDBInvoice(i, bizId))),
+        supabase.from('suppliers').insert(INIT_SUPPLIERS.map(s => toDBSupplier(s, bizId))),
+        supabase.from('inventory').insert(INIT_INVENTORY.map(i => toDBInventory(i, bizId))),
+      ]);
+      // State is already set to INIT_* defaults — no need to reload
+    };
+
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) loadBusiness(session.user);
+    });
+
+    // Auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        loadBusiness(session.user);
+      } else {
+        bizIdRef.current = null;
+        setCustomers(INIT_CUSTOMERS);
+        setLeads(INIT_LEADS);
+        setQuotes(INIT_QUOTES);
+        setInvoices(INIT_INVOICES);
+        setSuppliers(INIT_SUPPLIERS);
+        setInventory(INIT_INVENTORY);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // ── Background write helper ────────────────────────────────────────────────
+  const dbWrite = (fn) => {
+    if (isConfigured && bizIdRef.current) {
+      Promise.resolve(fn(bizIdRef.current)).catch((e) => console.warn('db write:', e));
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       // Leads
       leads,
-      addLead: (lead) =>
-        setLeads((p) => [{ id: Date.now(), date: 'היום', hot: false, ...lead }, ...p]),
-      updateLeadStatus: (id, status) =>
-        setLeads((p) => p.map((l) => (l.id === id ? { ...l, status } : l))),
+      addLead: (lead) => {
+        const n = { id: Date.now(), date: 'היום', hot: false, ...lead };
+        setLeads((p) => [n, ...p]);
+        dbWrite((biz) => supabase.from('leads').insert(toDBLead(n, biz)));
+      },
+      updateLeadStatus: (id, status) => {
+        setLeads((p) => p.map((l) => l.id === id ? { ...l, status } : l));
+        dbWrite(() => supabase.from('leads').update({ status }).eq('id', id));
+      },
 
       // Customers
       customers,
-      addCustomer: (c) =>
-        setCustomers((p) => [{
-          id: Date.now(),
-          visits: 0,
-          revenue: '₪0',
-          rating: 5.0,
-          lastVisit: 'היום',
-          initials: (c.name || '?').slice(0, 2),
-          ...c,
-        }, ...p]),
+      addCustomer: (c) => {
+        const n = { id: Date.now(), visits: 0, revenue: '₪0', rating: 5.0, lastVisit: 'היום', initials: (c.name || '?').slice(0, 2), ...c };
+        setCustomers((p) => [n, ...p]);
+        dbWrite((biz) => supabase.from('customers').insert(toDBCustomer(n, biz)));
+      },
 
       // Quotes
       quotes,
-      addQuote: (q) =>
-        setQuotes((p) => [{
-          id: `#${String(Date.now()).slice(-6)}`,
-          date: 'היום',
-          viewed: false,
-          hot: false,
-          status: 'open',
-          statusLabel: 'פתוח',
-          ...q,
-        }, ...p]),
-      updateQuoteStatus: (id, status, statusLabel) =>
-        setQuotes((p) => p.map((q) => (q.id === id ? { ...q, status, statusLabel } : q))),
-      markQuoteViewed: (id) =>
-        setQuotes((p) => p.map((q) => (q.id === id ? { ...q, viewed: true } : q))),
+      addQuote: (q) => {
+        const n = { id: `#${String(Date.now()).slice(-6)}`, date: 'היום', viewed: false, hot: false, status: 'open', statusLabel: 'פתוח', ...q };
+        setQuotes((p) => [n, ...p]);
+        dbWrite((biz) => supabase.from('quotes').insert(toDBQuote(n, biz)));
+      },
+      updateQuoteStatus: (id, status, statusLabel) => {
+        setQuotes((p) => p.map((q) => q.id === id ? { ...q, status, statusLabel } : q));
+        dbWrite(() => supabase.from('quotes').update({ status, status_label: statusLabel }).eq('id', id));
+      },
+      markQuoteViewed: (id) => {
+        setQuotes((p) => p.map((q) => q.id === id ? { ...q, viewed: true } : q));
+        dbWrite(() => supabase.from('quotes').update({ viewed: true }).eq('id', id));
+      },
 
       // Payments
       payments,
       markPaymentPaid: (id) =>
-        setPayments((p) => p.map((pay) => (pay.id === id ? { ...pay, status: 'paid', daysLate: 0 } : pay))),
+        setPayments((p) => p.map((pay) => pay.id === id ? { ...pay, status: 'paid', daysLate: 0 } : pay)),
 
       // Events
       events,
       addEvent: (ev) =>
         setEvents((p) => [...p, { id: Date.now(), status: 'waiting', statusLabel: 'ממתין', amount: '₪0', ...ev }]),
       markEventDone: (id) =>
-        setEvents((p) => p.map((e) => (e.id === id ? { ...e, status: 'done', statusLabel: 'הושלם' } : e))),
+        setEvents((p) => p.map((e) => e.id === id ? { ...e, status: 'done', statusLabel: 'הושלם' } : e)),
       markEventActive: (id) =>
-        setEvents((p) => p.map((e) => (e.id === id ? { ...e, status: 'active', statusLabel: 'בביצוע' } : e))),
+        setEvents((p) => p.map((e) => e.id === id ? { ...e, status: 'active', statusLabel: 'בביצוע' } : e)),
 
       // Invoices
       invoices,
-      addInvoice: (inv) => setInvoices((p) => [inv, ...p]),
-      markInvoicePaid: (id) => setInvoices((p) => p.map((i) => i.id === id ? { ...i, status: 'paid' } : i)),
+      addInvoice: (inv) => {
+        setInvoices((p) => [inv, ...p]);
+        dbWrite((biz) => supabase.from('invoices').insert(toDBInvoice(inv, biz)));
+      },
+      markInvoicePaid: (id) => {
+        setInvoices((p) => p.map((i) => i.id === id ? { ...i, status: 'paid' } : i));
+        dbWrite(() => supabase.from('invoices').update({ status: 'paid' }).eq('id', id));
+      },
 
       // Suppliers
       suppliers,
-      addSupplier: (s) => setSuppliers((p) => [{ id: Date.now(), rating: 5.0, lastOrder: 'טרם הוזמן', ...s }, ...p]),
+      addSupplier: (s) => {
+        const n = { id: Date.now(), rating: 5.0, lastOrder: 'טרם הוזמן', ...s };
+        setSuppliers((p) => [n, ...p]);
+        dbWrite((biz) => supabase.from('suppliers').insert(toDBSupplier(n, biz)));
+      },
 
       // Inventory
       inventory,
-      adjustQty: (id, delta) =>
-        setInventory((p) => p.map((item) => item.id === id ? { ...item, qty: Math.max(0, item.qty + delta) } : item)),
-      addInventoryItem: (item) =>
-        setInventory((p) => [{ id: Date.now(), qty: 0, ...item }, ...p]),
+      adjustQty: (id, delta) => {
+        setInventory((p) => p.map((item) => {
+          if (item.id !== id) return item;
+          const qty = Math.max(0, item.qty + delta);
+          dbWrite(() => supabase.from('inventory').update({ qty }).eq('id', id));
+          return { ...item, qty };
+        }));
+      },
+      addInventoryItem: (item) => {
+        const n = { id: Date.now(), qty: 0, ...item };
+        setInventory((p) => [n, ...p]);
+        dbWrite((biz) => supabase.from('inventory').insert(toDBInventory(n, biz)));
+      },
 
       // Purchase Orders
       purchaseOrders,
@@ -226,22 +352,13 @@ export function AppProvider({ children }) {
       // Reminders
       reminders,
       toggleReminder: (id) =>
-        setReminders((p) => p.map((r) => (r.id === id ? { ...r, active: !r.active } : r))),
+        setReminders((p) => p.map((r) => r.id === id ? { ...r, active: !r.active } : r)),
       addReminder: (r) =>
-        setReminders((p) => [{
-          id: Date.now(),
-          count: 0,
-          active: true,
-          lastSent: 'טרם נשלח',
-          nextSend: 'מחר ב-09:00',
-          ...r,
-        }, ...p]),
+        setReminders((p) => [{ id: Date.now(), count: 0, active: true, lastSent: 'טרם נשלח', nextSend: 'מחר ב-09:00', ...r }, ...p]),
     }}>
       {children}
     </AppContext.Provider>
   );
 }
 
-export function useApp() {
-  return useContext(AppContext);
-}
+export function useApp() { return useContext(AppContext); }
