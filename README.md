@@ -1,16 +1,85 @@
-# React + Vite
+# MyPartner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MyPartner is an AI-based business assistant web application.  
+The system helps small business owners understand business information such as customers, leads, payments, suppliers, open proposals and daily business questions through a simple Hebrew interface.
 
-Currently, two official plugins are available:
+## Live Project
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Vercel URL:  
+[Add Vercel link here]
 
-## React Compiler
+## GitHub Repository
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+GitHub URL:  
+[Add GitHub repository link here]
 
-## Expanding the ESLint configuration
+## Product Definition
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Problem
+Small business owners often manage business information across many places: customers, payments, suppliers, proposals and tasks. This makes it difficult to quickly understand what is happening in the business.
+
+### Target Audience
+Small business owners and independent service providers who need a simple digital assistant for business management.
+
+### Value
+MyPartner provides a friendly AI assistant that allows the user to ask questions about the business and receive simple, clear answers in Hebrew.
+
+### Differentiation
+Unlike a regular CRM or dashboard, MyPartner focuses on a conversational AI experience, allowing the user to ask natural questions instead of searching manually through tables.
+
+## Main Features
+
+- AI business assistant interface
+- Hebrew chat-style user experience
+- Dashboard screens
+- Customer-related area
+- Proposals area
+- Mobile-first responsive design
+- Bottom navigation for app-like usage
+- Clean UI and accessible layout
+
+## Technologies
+
+- React
+- JavaScript
+- CSS
+- Vite
+- GitHub
+- Vercel
+
+## External Services and Integrations
+
+| Service | Type | Purpose |
+| --- | --- | --- |
+| GitHub | Version Control | Stores the project code |
+| Vercel | Deployment | Hosts the live project |
+| AI Service / OpenAI-ready structure | API / AI | Intended for AI-based business answers and text generation |
+| Local React State / Frontend Data | Frontend Logic | Used for displaying business data and user interaction |
+
+## Database / ERD
+
+The current version focuses mainly on the frontend and user experience.  
+The following ERD represents the planned data model for a full production version.
+
+ERD image / link:  
+[Add ERD link or image here]
+
+## Planned Data Model
+
+Main entities:
+
+- Users
+- Businesses
+- Customers
+- Proposals
+- Suppliers
+- Payments
+- Chat Sessions
+- Chat Messages
+
+## How to Run Locally
+
+```bash
+npm install
+npm run dev
+```
