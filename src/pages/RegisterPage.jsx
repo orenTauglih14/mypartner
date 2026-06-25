@@ -100,23 +100,6 @@ export default function RegisterPage() {
           <p className="text-small text-mute">פתח חשבון ותתחיל לנהל את העסק</p>
         </div>
 
-        {/* Social signup */}
-        <div className="register-oauth">
-          <button type="button" className="register-oauth-btn" onClick={() => navigate('/onboarding')}>
-            <GoogleLogo />
-            <span>המשך עם Google</span>
-          </button>
-          <button type="button" className="register-oauth-btn" onClick={() => navigate('/onboarding')}>
-            <AppleLogo />
-            <span>המשך עם Apple</span>
-          </button>
-        </div>
-
-        <div className="register-divider">
-          <span className="register-divider__line" />
-          <span className="register-divider__text">או הירשם עם אימייל</span>
-          <span className="register-divider__line" />
-        </div>
 
         <form className="register-form" onSubmit={handleSubmit}>
           {error && <div className="login-error" style={{ marginBottom: 12 }}>{error}</div>}

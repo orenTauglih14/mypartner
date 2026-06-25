@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import Footer from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
 import './OnboardingPage.css';
 
 const PROFESSIONS = ['אינסטלטור', 'שיפוצניק', 'חשמלאי', 'טכנאי מיזוג', 'צבעי', 'נגר', 'גנן', 'אחר'];
@@ -419,7 +420,12 @@ const TOTAL_CONTENT_STEPS = 4;
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    if (!isLoggedIn) navigate('/register', { replace: true });
+  }, [isLoggedIn, navigate]);
   const next = () => setStep(s => s + 1);
 
   const STEP_TITLES = ['', 'אפיון המקצוע', 'פרטי העסק', 'תבניות הודעות', 'החתימה שלך', 'הכל מוכן!'];

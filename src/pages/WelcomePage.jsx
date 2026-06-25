@@ -112,7 +112,7 @@ export default function WelcomePage() {
 
       {/* CTA buttons */}
       <section className="welcome-cta px-container">
-        <Link to="/onboarding" className="btn btn--primary btn--lg btn--full">
+        <Link to="/register" className="btn btn--primary btn--lg btn--full">
           התחל עכשיו
         </Link>
         <Link to="/login" className="btn btn--outline btn--lg btn--full">
