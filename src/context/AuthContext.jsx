@@ -36,20 +36,43 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     if (!isConfigured) {
-      if (!email.trim() || password.length < 6) return { ok: false, error: 'יש להזין אימייל וסיסמה' };
-      const stored = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; } })();
-      if (stored?.email && email.trim().toLowerCase() !== stored.email.toLowerCase()) return { ok: false, error: 'אימייל או סיסמה שגויים' };
-      if (stored?.password && password !== stored.password) return { ok: false, error: 'אימייל או סיסמה שגויים' };
-      const user = stored || { email: email.trim(), name: email.split('@')[0] };
+      const user = { email: email.trim(), name: email.split('@')[0] };
       localStorage.setItem(STORAGE_AUTH, 'true');
       localStorage.setItem(STORAGE_USER, JSON.stringify(user));
       setCurrentUser(user);
       setIsLoggedIn(true);
       return { ok: true };
     }
-
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) return { ok: false, error: 'אימייל או סיסמה שגויים' };
+    return { ok: true };
+  };
+
+  const sendOtp = async (email) => {
+    if (!isConfigured) {
+      const user = { email: email.trim(), name: email.split('@')[0] };
+      localStorage.setItem(STORAGE_AUTH, 'true');
+      localStorage.setItem(STORAGE_USER, JSON.stringify(user));
+      setCurrentUser(user);
+      setIsLoggedIn(true);
+      return { ok: true, demo: true };
+    }
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { shouldCreateUser: true },
+    });
+    if (error) return { ok: false, error: 'שגיאה בשליחת קוד — בדוק את האימייל' };
+    return { ok: true };
+  };
+
+  const verifyOtp = async (email, token) => {
+    if (!isConfigured) return { ok: true };
+    const { error } = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token: token.trim(),
+      type: 'email',
+    });
+    if (error) return { ok: false, error: 'קוד שגוי או פג תוקף — נסה שוב' };
     return { ok: true };
   };
 
@@ -62,17 +85,10 @@ export function AuthProvider({ children }) {
       setIsLoggedIn(true);
       return { ok: true, confirmed: true };
     }
-
     const { data, error } = await supabase.auth.signUp({
       email: userData.email.trim(),
       password: userData.password,
-      options: {
-        data: {
-          full_name: userData.name,
-          profession: userData.profession,
-          phone: userData.phone,
-        },
-      },
+      options: { data: { full_name: userData.name, profession: userData.profession, phone: userData.phone } },
     });
     if (error) return { ok: false, error: error.message };
     if (data.session) return { ok: true, confirmed: true };
@@ -113,7 +129,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, currentUser, login, register, logout, resetPassword }}>
+    <AuthContext.Provider value={{ isLoggedIn, currentUser, login, sendOtp, verifyOtp, register, logout, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );
