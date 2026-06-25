@@ -62,14 +62,15 @@ export function AuthProvider({ children }) {
       setIsLoggedIn(true);
       return { ok: true, demo: true };
     }
+    inOtpFlow.current = true;
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: {
-        shouldCreateUser: true,
-        emailRedirectTo: window.location.origin,
-      },
+      options: { shouldCreateUser: true },
     });
-    if (error) return { ok: false, error: 'שגיאה בשליחת קישור — בדוק את האימייל' };
+    if (error) {
+      inOtpFlow.current = false;
+      return { ok: false, error: 'שגיאה בשליחת קוד — נסה שוב' };
+    }
     return { ok: true };
   };
 
