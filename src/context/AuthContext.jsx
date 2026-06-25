@@ -30,7 +30,6 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // כניסה — אם המשתמש לא קיים, נרשום אותו אוטומטית
   const login = async (email, password) => {
     const e = email.trim().toLowerCase();
     const p = password.trim();
@@ -38,32 +37,46 @@ export function AuthProvider({ children }) {
 
     if (!isConfigured) {
       const stored = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; } })();
-      if (stored?.email === e) {
-        if (stored.password && stored.password !== p) return { ok: false, error: 'סיסמה שגויה' };
-      }
+      if (stored?.email === e && stored.password && stored.password !== p)
+        return { ok: false, error: 'סיסמה שגויה' };
       const user = { email: e, name: e.split('@')[0], password: p };
       localStorage.setItem(STORAGE_AUTH, 'true');
       localStorage.setItem(STORAGE_USER, JSON.stringify(user));
-      setCurrentUser(user);
-      setIsLoggedIn(true);
+      setCurrentUser(user); setIsLoggedIn(true);
       return { ok: true };
     }
 
-    // נסה להתחבר קודם
-    const { error: signInErr } = await supabase.auth.signInWithPassword({ email: e, password: p });
-    if (!signInErr) return { ok: true };
+    const { error } = await supabase.auth.signInWithPassword({ email: e, password: p });
+    if (!error) return { ok: true };
+    return { ok: false, error: 'אימייל או סיסמה שגויים' };
+  };
 
-    // אם לא קיים — הרשם
-    if (signInErr.message?.toLowerCase().includes('invalid') || signInErr.message?.includes('credentials')) {
-      const { error: signUpErr } = await supabase.auth.signUp({ email: e, password: p });
-      if (signUpErr) return { ok: false, error: 'שגיאה ביצירת חשבון — נסה שוב' };
-      // אחרי הרשמה, כנס
-      const { error: err2 } = await supabase.auth.signInWithPassword({ email: e, password: p });
-      if (err2) return { ok: false, error: 'החשבון נוצר — אנא כנס שוב' };
-      return { ok: true, newUser: true };
+  const register = async ({ email, password }) => {
+    const e = email.trim().toLowerCase();
+    const p = password.trim();
+    if (!e || !p) return { ok: false, error: 'יש למלא אימייל וסיסמה' };
+    if (p.length < 6)  return { ok: false, error: 'הסיסמה חייבת להיות לפחות 6 תווים' };
+
+    if (!isConfigured) {
+      const stored = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_USER)); } catch { return null; } })();
+      if (stored?.email === e) return { ok: false, error: 'האימייל כבר קיים — כנס עם הסיסמה שלך' };
+      const user = { email: e, name: e.split('@')[0], password: p };
+      localStorage.setItem(STORAGE_AUTH, 'true');
+      localStorage.setItem(STORAGE_USER, JSON.stringify(user));
+      setCurrentUser(user); setIsLoggedIn(true);
+      return { ok: true };
     }
 
-    return { ok: false, error: 'סיסמה שגויה' };
+    const { error: signUpErr } = await supabase.auth.signUp({ email: e, password: p });
+    if (signUpErr) {
+      if (signUpErr.message?.toLowerCase().includes('already')) {
+        return { ok: false, error: 'האימייל כבר רשום — כנס עם הסיסמה שלך' };
+      }
+      return { ok: false, error: 'שגיאה ביצירת חשבון — נסה שוב' };
+    }
+    // sign in right after signup
+    await supabase.auth.signInWithPassword({ email: e, password: p });
+    return { ok: true };
   };
 
   const logout = async () => {
