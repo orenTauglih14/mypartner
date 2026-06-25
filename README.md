@@ -6,7 +6,7 @@ The system helps small business owners understand business information such as c
 ## Live Project
 
 Vercel URL:  
-[Add Vercel link here]
+https://mypartner-one.vercel.app/
 
 ## GitHub Repository
 
@@ -56,26 +56,88 @@ Unlike a regular CRM or dashboard, MyPartner focuses on a conversational AI expe
 | AI Service / OpenAI-ready structure | API / AI | Intended for AI-based business answers and text generation |
 | Local React State / Frontend Data | Frontend Logic | Used for displaying business data and user interaction |
 
-## Database / ERD
+## ERD
 
-The current version focuses mainly on the frontend and user experience.  
-The following ERD represents the planned data model for a full production version.
+The ERD describes the planned database structure for a production version of MyPartner.
 
-ERD image / link:  
-[Add ERD link or image here]
+```mermaid
+erDiagram
+    USERS ||--o{ BUSINESSES : owns
+    BUSINESSES ||--o{ CUSTOMERS : has
+    BUSINESSES ||--o{ PROPOSALS : has
+    BUSINESSES ||--o{ SUPPLIERS : has
+    BUSINESSES ||--o{ PAYMENTS : has
+    BUSINESSES ||--o{ CHAT_SESSIONS : has
+    CUSTOMERS ||--o{ PROPOSALS : receives
+    CUSTOMERS ||--o{ PAYMENTS : makes
+    CHAT_SESSIONS ||--o{ CHAT_MESSAGES : contains
 
-## Planned Data Model
+    USERS {
+        string id
+        string full_name
+        string email
+        datetime created_at
+    }
 
-Main entities:
+    BUSINESSES {
+        string id
+        string user_id
+        string business_name
+        string industry
+        datetime created_at
+    }
 
-- Users
-- Businesses
-- Customers
-- Proposals
-- Suppliers
-- Payments
-- Chat Sessions
-- Chat Messages
+    CUSTOMERS {
+        string id
+        string business_id
+        string full_name
+        string phone
+        string email
+        string status
+    }
+
+    PROPOSALS {
+        string id
+        string business_id
+        string customer_id
+        string title
+        number amount
+        string status
+        datetime created_at
+    }
+
+    SUPPLIERS {
+        string id
+        string business_id
+        string supplier_name
+        string phone
+        string email
+    }
+
+    PAYMENTS {
+        string id
+        string business_id
+        string customer_id
+        number amount
+        string status
+        date due_date
+    }
+
+    CHAT_SESSIONS {
+        string id
+        string business_id
+        string user_id
+        datetime created_at
+    }
+
+    CHAT_MESSAGES {
+        string id
+        string session_id
+        string sender
+        string message
+        datetime created_at
+    }
+```
 
 ## How to Run Locally
 
