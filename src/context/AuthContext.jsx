@@ -103,7 +103,14 @@ export function AuthProvider({ children }) {
     return { ok: true, emailSent: true };
   };
 
-  if (!authReady) return null;
+  if (!authReady) {
+    return (
+      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg, #F4F6FB)' }}>
+        <div style={{ width: 36, height: 36, border: '3px solid #0050CB', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, currentUser, login, register, logout, resetPassword }}>
